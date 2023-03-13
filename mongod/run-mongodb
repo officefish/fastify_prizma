@@ -1,4 +1,5 @@
 #!/bin/bash
 # This is a comment
 #mongod --bind_ip localhost --dbpath C:\data\db --port 27017 --config ./mongo-one.conf
-mongod --config ./mongod-one.conf
+#rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});
+mongod --config ./mongod-one.conf 

@@ -14,11 +14,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildApp = void 0;
 const fastify_1 = __importDefault(require("fastify"));
-//import prismaPlugin from './prisma.plugin'
+const plugins_1 = __importDefault(require("./plugins"));
 const user_route_1 = require("./modules/user/user.route");
+const user_schema_1 = require("./modules/user/user.schema");
 function buildApp(options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const fastify = (0, fastify_1.default)(options);
+        for (const schema of user_schema_1.UserSchemas) {
+            fastify.addSchema(schema);
+        }
+        fastify.register(plugins_1.default.PrismaPlugin);
+        fastify.register(plugins_1.default.MinCryptoPlugin);
         fastify.register(user_route_1.UserRoutes, { prefix: 'api/users' });
         return fastify;
     });

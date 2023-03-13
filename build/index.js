@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./app");
-//import { main } from './services'
+const mock_service_1 = require("./services/mock.service");
 const options = {
     logger: true,
 };
@@ -26,7 +26,7 @@ const start = () => __awaiter(void 0, void 0, void 0, function* () {
             port: 8001,
             host: '0.0.0.0',
         });
-        //await main(app.prisma)
+        yield (0, mock_service_1.mock)(app.prisma);
     }
     catch (err) {
         app.log.error(err);

@@ -10,8 +10,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterUserHandler = void 0;
+const user_service_1 = require("./user.service");
 function register(request, reply) {
     return __awaiter(this, void 0, void 0, function* () {
+        const { body, server } = request;
+        try {
+            const user = yield (0, user_service_1.CreateUserService)(server.prisma, server.minCrypto, body);
+            return reply.code(201).send(user);
+        }
+        catch (e) {
+            return reply.code(500).send(e);
+        }
     });
 }
 exports.RegisterUserHandler = register;

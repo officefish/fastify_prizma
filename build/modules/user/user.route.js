@@ -11,9 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserRoutes = void 0;
 const user_controller_1 = require("./user.controller");
+const user_schema_1 = require("./user.schema");
 function routes(server) {
     return __awaiter(this, void 0, void 0, function* () {
-        server.post('/', user_controller_1.RegisterUserHandler);
+        server.post('/', {
+            schema: {
+                body: (0, user_schema_1.$ref)('createUserSchema'),
+                response: {
+                    201: (0, user_schema_1.$ref)('createUserResponseSchema'),
+                }
+            },
+        }, user_controller_1.RegisterUserHandler);
     });
 }
 exports.UserRoutes = routes;

@@ -1,5 +1,5 @@
 import { buildApp, AppOptions } from './app'
-//import { main } from './services'
+import { mock } from './services/mock.service'
 
 const options: AppOptions = {
     logger: true,
@@ -18,7 +18,7 @@ const start = async () => {
         host: '0.0.0.0',
       })
 
-      //await main(app.prisma)
+      await mock(app.prisma)
       
     } catch (err) {
       app.log.error(err);
