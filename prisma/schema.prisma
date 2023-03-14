@@ -20,12 +20,18 @@ model User {
 }
 
 model Product {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  createAt   DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  title      String   
-  content    String?
-  prices     Float
-  owner      User      @relation(fields:[ownerId], references:[id])
-  ownerId    String    @db.ObjectId
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  title       String   
+  content     String?
+  price       Float
+  owner       User      @relation(fields:[ownerId], references:[id])
+  ownerId     String    @db.ObjectId
 }
+
+//  model Post {
+// fields
+//  @@map('Post')
+//  }
+

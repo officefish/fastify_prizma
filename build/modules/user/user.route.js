@@ -22,6 +22,17 @@ function routes(server) {
                 }
             },
         }, user_controller_1.RegisterUserHandler);
+        server.post('/auth', {
+            schema: {
+                body: (0, user_schema_1.$ref)('loginUserSchema'),
+                response: {
+                    200: (0, user_schema_1.$ref)('loginUserResponseSchema'),
+                }
+            }
+        }, user_controller_1.LoginUserHandler);
+        server.get('/', {
+            preHandler: [server.authenticate]
+        }, user_controller_1.GetUsersHandler);
     });
 }
 exports.UserRoutes = routes;

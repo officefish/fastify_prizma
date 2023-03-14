@@ -17,15 +17,20 @@ const fastify_1 = __importDefault(require("fastify"));
 const plugins_1 = __importDefault(require("./plugins"));
 const user_route_1 = require("./modules/user/user.route");
 const user_schema_1 = require("./modules/user/user.schema");
+const product_route_1 = require("./modules/product/product.route");
+const product_schema_1 = require("./modules/product/product.schema");
 function buildApp(options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const fastify = (0, fastify_1.default)(options);
-        for (const schema of user_schema_1.UserSchemas) {
+        for (const schema of [...user_schema_1.UserSchemas, ...product_schema_1.ProductSchemas]) {
             fastify.addSchema(schema);
         }
+        fastify.register(plugins_1.default.AuthPlugin);
         fastify.register(plugins_1.default.PrismaPlugin);
         fastify.register(plugins_1.default.MinCryptoPlugin);
+        fastify.register(plugins_1.default.SwaggerPlugin);
         fastify.register(user_route_1.UserRoutes, { prefix: 'api/users' });
+        fastify.register(product_route_1.ProductRoutes, { prefix: 'api/products' });
         return fastify;
     });
 }

@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateUserService = void 0;
+exports.FindUsersService = exports.VerifyPasswordService = exports.FindUserByEmailService = exports.CreateUserService = void 0;
 function createUser(prisma, crypto, input) {
     return __awaiter(this, void 0, void 0, function* () {
         const { password } = input, rest = __rest(input, ["password"]);
@@ -32,3 +32,27 @@ function createUser(prisma, crypto, input) {
     });
 }
 exports.CreateUserService = createUser;
+function verifyPassword(crypto, input) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return crypto.verifyPassword(input);
+    });
+}
+exports.VerifyPasswordService = verifyPassword;
+function findUserByEmail(prisma, email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield prisma.user.findUnique({ where: { email } });
+    });
+}
+exports.FindUserByEmailService = findUserByEmail;
+function findUsers(prisma) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return prisma.user.findMany({
+            select: {
+                id: true,
+                email: true,
+                name: true,
+            }
+        });
+    });
+}
+exports.FindUsersService = findUsers;
