@@ -1,13 +1,18 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+generator prisma_client_js {
+  provider = "prisma-client-js"
+}
+
+generator pothosPrisma {
+  provider     = "prisma-pothos-types"
+  clientOutput = "@prisma/client"
 }
 
 model User {
@@ -30,8 +35,5 @@ model Product {
   ownerId     String    @db.ObjectId
 }
 
-//  model Post {
-// fields
-//  @@map('Post')
-//  }
+
 

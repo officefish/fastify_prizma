@@ -2,7 +2,10 @@ import { PrismaClient } from '@prisma/client'
 import fp from 'fastify-plugin'
 
 async function initDatabaseConnection(): Promise<PrismaClient> {
-    const db = new PrismaClient()
+    const db = new PrismaClient({
+        log: [{ level: 'query', emit: 'event' }, 'info', 'warn', 'error'],
+        errorFormat: 'pretty'
+    })
     await db.$connect()
     return db
 }
@@ -19,6 +22,9 @@ const prismaPlugin = fp(async (server) => {
   
     // Make Prisma Client available through the fastify server instance: server.prisma
     server.decorate('prisma', prisma)
+    // server.addHook('on', async () => {
+    //     await prisma.$disconnect()
+    // })
     server.addHook('onClose', async () =>  {
       await server.prisma.$disconnect()
     })

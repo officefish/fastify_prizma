@@ -19,16 +19,26 @@ const user_route_1 = require("./modules/user/user.route");
 const user_schema_1 = require("./modules/user/user.schema");
 const product_route_1 = require("./modules/product/product.route");
 const product_schema_1 = require("./modules/product/product.schema");
+const post_query_1 = require("./modules/post/post.query");
+const user_query_1 = require("./modules/user/user.query");
+const product_query_1 = require("./modules/product/product.query");
 function buildApp(options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const fastify = (0, fastify_1.default)(options);
         for (const schema of [...user_schema_1.UserSchemas, ...product_schema_1.ProductSchemas]) {
             fastify.addSchema(schema);
         }
+        fastify.register(plugins_1.default.ShutdownPlugin);
         fastify.register(plugins_1.default.AuthPlugin);
         fastify.register(plugins_1.default.PrismaPlugin);
         fastify.register(plugins_1.default.MinCryptoPlugin);
         fastify.register(plugins_1.default.SwaggerPlugin);
+        fastify.register(plugins_1.default.PothosPlugin);
+        /* Here we should register all gql query fields */
+        fastify.register(user_query_1.BuildUserQuery);
+        fastify.register(post_query_1.BuildPostQuery);
+        fastify.register(product_query_1.BuildProductQuery);
+        fastify.register(plugins_1.default.MercuriusPlugin);
         fastify.register(user_route_1.UserRoutes, { prefix: 'api/users' });
         fastify.register(product_route_1.ProductRoutes, { prefix: 'api/products' });
         return fastify;

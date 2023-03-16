@@ -27,3 +27,8 @@
 #media
 **/media
 **/.env
+
+#graphql
+**/schema.graphql
+**/schema.gql
+**/generated

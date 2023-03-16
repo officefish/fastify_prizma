@@ -1,0 +1,39 @@
+import fp from 'fastify-plugin'
+
+const buildQuery = fp(async (server) => {
+
+    const builder = server.schema.builder
+
+    const User = builder.prismaObject('User', {
+        name: 'User',
+        fields: (t) => ({
+            id: t.exposeString('id', { nullable: false }),
+            name: t.exposeString('name', { nullable: true }),
+            email: t.exposeString('email', { nullable: false }),
+        }),
+    })
+
+    builder.queryFields((t) => ({
+        user: t.prismaField({
+            type: User,
+            nullable: true,
+            args: {
+                id: t.arg.int({ required: true })
+            },
+            resolve: (query, root, args, context) =>
+            context.prisma.user.findUnique({
+                ...query,
+                where: { id: String(args.id) }
+            })
+        }),
+        manyUsers: t.prismaField({
+            type: [User],
+            nullable: true,
+            args: {},
+            resolve: (query, root, args, context) =>
+            context.prisma.user.findMany({...query})
+        })
+    }))
+})
+
+export { buildQuery as BuildUserQuery }
