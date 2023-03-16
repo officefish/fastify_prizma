@@ -20,6 +20,9 @@ const buildQuery = fp(async (server) => {
             args: {
                 id: t.arg.int({ required: true })
             },
+            authScopes: {
+                authenticate: true,
+            },
             resolve: (query, root, args, context) =>
             context.prisma.user.findUnique({
                 ...query,
@@ -28,7 +31,10 @@ const buildQuery = fp(async (server) => {
         }),
         manyUsers: t.prismaField({
             type: [User],
-            nullable: true,
+            nullable: false,
+            authScopes: {
+                authenticate: true,
+            },
             args: {},
             resolve: (query, root, args, context) =>
             context.prisma.user.findMany({...query})

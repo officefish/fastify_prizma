@@ -13,12 +13,11 @@
     "start": "node dist/index",
     "clean": "rm -rf dist",
     "build": "npm -s run clean && npm -s run generate && tsc",
-    "generate": "npm -s run generate:prisma && npm -s run generate:pothos",
+    "generate": "npm -s run generate:prisma",
     "generate:prisma": "prisma generate",
-    "generate:pothos": "ts-node --transpile-only src/schema",
     "db:push": "prisma db push --preview-feature",
     "format": "npx prettier --write './**/*.{ts,md}'",
-    "test": "tap --node-arg=--require=ts-node/register"
+    "test": "tap --reporter=list"
   },
   "prettier": {
     "semi": false,
@@ -32,6 +31,7 @@
     "nodemon": "^2.0.21",
     "prettier": "^2.8.4",
     "prisma": "^4.11.0",
+    "tap": "^16.3.4",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.1.2",
@@ -42,6 +42,7 @@
     "@fastify/swagger-ui": "^1.5.0",
     "@pothos/core": "^3.28.0",
     "@pothos/plugin-prisma": "^3.43.0",
+    "@pothos/plugin-scope-auth": "^3.18.0",
     "@prisma/client": "^4.11.0",
     "fastify": "^4.14.1",
     "fastify-plugin": "^4.5.0",

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildApp = void 0;
+exports.startApp = exports.buildApp = void 0;
 const fastify_1 = __importDefault(require("fastify"));
 const plugins_1 = __importDefault(require("./plugins"));
 const user_route_1 = require("./modules/user/user.route");
@@ -45,3 +45,23 @@ function buildApp(options = {}) {
     });
 }
 exports.buildApp = buildApp;
+function startApp(server) {
+    return __awaiter(this, void 0, void 0, function* () {
+        server.get('/healthcheck', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                return { status: 'ok' };
+            });
+        });
+        try {
+            yield server.listen({
+                port: 8001,
+                host: '0.0.0.0',
+            });
+        }
+        catch (err) {
+            server.log.error(err);
+            process.exit(1);
+        }
+    });
+}
+exports.startApp = startApp;

@@ -3,6 +3,8 @@ import fp from 'fastify-plugin'
 
 import SchemaBuilder from '@pothos/core'
 import PrismaPlugin from '@pothos/plugin-prisma'
+import ScopeAuthPlugin from '@pothos/plugin-scope-auth'
+
 import { Prisma } from '@prisma/client'
 import type PrismaTypes from '@pothos/plugin-prisma/generated'
 import { FastifyRequest, FastifyReply } from 'fastify'
@@ -14,6 +16,9 @@ type PothosSchemaBuilder = PothosSchemaTypes.SchemaBuilder<PothosSchemaTypes.Ext
         prisma: PrismaClient
     }
     PrismaTypes: PrismaTypes
+    AuthScopes: {
+        authenticate: boolean
+    }
 }>>
 
 async function initBuilder(prisma:PrismaClient): Promise<PothosSchemaBuilder> {
@@ -24,8 +29,11 @@ async function initBuilder(prisma:PrismaClient): Promise<PothosSchemaBuilder> {
             prisma: PrismaClient
         }
         PrismaTypes: PrismaTypes
+        AuthScopes: {
+            authenticate: boolean
+        }
     }>({
-        plugins: [PrismaPlugin],
+        plugins: [PrismaPlugin, ScopeAuthPlugin],
         prisma: {
             client: prisma,
                 // Because the prisma client is loaded dynamically, we need to explicitly provide the some information about the prisma schema
@@ -33,6 +41,9 @@ async function initBuilder(prisma:PrismaClient): Promise<PothosSchemaBuilder> {
             // use where clause from prismaRelatedConnection for totalCount (will true by default in next major version)
             filterConnectionTotalCount: true,
         },
+        authScopes: async (context) => ({
+            authenticate: context.request.server.user.id !== '',
+        }),
     })
     
     return builder

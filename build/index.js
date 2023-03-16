@@ -10,27 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./app");
-const mock_service_1 = require("./services/mock.service");
 const options = {
     logger: true,
 };
 const start = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = yield (0, app_1.buildApp)(options);
-    app.get('/healthcheck', function () {
-        return __awaiter(this, void 0, void 0, function* () {
-            return { status: 'ok' };
-        });
-    });
-    try {
-        yield app.listen({
-            port: 8001,
-            host: '0.0.0.0',
-        });
-        yield (0, mock_service_1.mock)(app.prisma);
-    }
-    catch (err) {
-        app.log.error(err);
-        process.exit(1);
-    }
+    (0, app_1.startApp)(app);
 });
 start();

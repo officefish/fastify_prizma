@@ -14,4 +14,19 @@ async function authentication (
         return reply.code(401).send(error)
     }
 }
-export {authentication as AuthenticateHandler} 
+
+async function initialization (
+    request:FastifyRequest, 
+) {    
+    const jwttoken = request.headers['authorization']
+    const tokenArray = jwttoken?.toString().split(" ") || []
+    const tokenPayload = tokenArray[1] && request.server.jwt.decode(tokenArray[1])
+    const identity = tokenPayload && Object(tokenPayload).id || '' 
+    request.user = Object(tokenPayload)
+    request.server.user.id =  identity
+}
+
+export {
+    authentication as AuthenticateHandler,
+    initialization as InitializeHandler
+} 

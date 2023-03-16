@@ -1,4 +1,4 @@
-import Fastify, { FastifyServerOptions } from 'fastify'
+import Fastify, { FastifyServerOptions, FastifyInstance } from 'fastify'
 import plugins from './plugins'
 
 import { UserRoutes } from './modules/user/user.route'
@@ -38,4 +38,22 @@ async function buildApp(options: AppOptions = {}) {
     fastify.register(ProductRoutes, { prefix: 'api/products' })
     return fastify
 }
-export { buildApp }
+
+async function startApp(server:FastifyInstance) {
+    
+    server.get('/healthcheck', async function() {
+        return { status: 'ok' }
+    })
+  
+    try {
+      await server.listen({
+        port: 8001,
+        host: '0.0.0.0',
+      })  
+    } catch (err) {
+      server.log.error(err)
+      process.exit(1)
+    }
+}
+
+export { buildApp, startApp }

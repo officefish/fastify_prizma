@@ -18,6 +18,9 @@ const buildQuery = fp(async (server) => {
         product: t.prismaField({
 			type: Product,
 			nullable: true,
+            authScopes: {
+                authenticate: true,
+            },
 			args: {
 				id: t.arg.int({ required: true })
 			},
@@ -30,6 +33,9 @@ const buildQuery = fp(async (server) => {
 		manyProducts: t.prismaField({
 			type: [Product],
 			nullable: true,
+            authScopes: {
+                authenticate: true,
+            },
 			args: {},
 			resolve: (query, root, args, ctx) =>
 			ctx.prisma.product.findMany({...query})
