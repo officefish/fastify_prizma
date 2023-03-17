@@ -1,6 +1,8 @@
 import crypto from 'crypto'
 import fp from 'fastify-plugin'
 
+import bcrypt from 'bcryptjs'
+const {compare, genSalt, hash} = bcrypt
 
 interface MinCrypto {
     hashPassword(password: string): void
@@ -9,6 +11,7 @@ interface MinCrypto {
         salt: string,
         hash: string
     }) : boolean
+    
 }
 
 class MinCrypto implements MinCrypto {
@@ -31,14 +34,22 @@ class MinCrypto implements MinCrypto {
     }
 }
 
+export interface Bcrypt {
+    hash(payload:string, salt:string) : string
+    compare(payload1: string, payload2: string) : boolean
+    genSalt(length:number) : string
+}
+
 declare module 'fastify' {
     interface FastifyInstance {
-        minCrypto: MinCrypto
+        minCrypto: MinCrypto,
+        bcrypt: Bcrypt
     }
 }
 
 const minCryptoPlugin = fp(async (server) => {
     const minCrypto = await new MinCrypto()
+    server.decorate('bcrypt', { hash, compare, genSalt })
     server.decorate('minCrypto', minCrypto)
     // server.addHook('onClose', async () =>  {
     //     server.minCrypto.hashPassword('someStr')

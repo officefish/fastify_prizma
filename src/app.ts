@@ -20,6 +20,7 @@ async function buildApp(options: AppOptions = {}) {
         fastify.addSchema(schema)
     }
 
+    fastify.register(plugins.DotEnvPlugin)
     fastify.register(plugins.ShutdownPlugin)
     fastify.register(plugins.AuthPlugin)
     fastify.register(plugins.PrismaPlugin)

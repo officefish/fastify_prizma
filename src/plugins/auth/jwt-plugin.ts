@@ -13,11 +13,29 @@ declare module 'fastify' {
     }
 }
 
+interface UnivocalJwt {
+    user: {
+       email: string
+       name: string
+       userId: number
+    }
+}
+
+interface UserPayload {
+    id: string
+}
+
+interface JwtExpPayload {
+    expiresIn: string
+    exp: number
+}
+
+
 const jwtPlugin = fp(async (server) => {
     server.decorate('initialize', InitializeHandler)
     server.decorate('authenticate', AuthenticateHandler)
     server.decorate('user', {})
-    server.register(jwt, { secret: "very very very secret" })
+    server.register(jwt, { secret: server.env.JWT_SIGNATURE })
     
     server.addHook('onRoute', (routeOptions) => {
         if (routeOptions.url === '/graphql') {
@@ -27,4 +45,7 @@ const jwtPlugin = fp(async (server) => {
     })
 })
 
-export { jwtPlugin as AuthPlugin }
+export { 
+    jwtPlugin as AuthPlugin,
+    UnivocalJwt, UserPayload, JwtExpPayload 
+}
