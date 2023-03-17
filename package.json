@@ -17,7 +17,8 @@
     "generate:prisma": "prisma generate",
     "db:push": "prisma db push --preview-feature",
     "format": "npx prettier --write './**/*.{ts,md}'",
-    "test": "tap --reporter=list"
+    "tap-test": "tap --reporter=list --watch",
+    "test": "node --test --watch"
   },
   "prettier": {
     "semi": false,
@@ -31,6 +32,7 @@
     "nodemon": "^2.0.21",
     "prettier": "^2.8.4",
     "prisma": "^4.11.0",
+    "supertest": "^6.3.3",
     "tap": "^16.3.4",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",

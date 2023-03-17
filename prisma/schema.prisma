@@ -13,6 +13,7 @@ generator prisma_client_js {
 generator pothosPrisma {
   provider     = "prisma-pothos-types"
   clientOutput = "@prisma/client"
+  //output = "./pothos-types.ts"
 }
 
 model User {

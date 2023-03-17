@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.startApp = exports.buildApp = void 0;
+exports.startApp = exports.buildEmpty = exports.buildApp = void 0;
 const fastify_1 = __importDefault(require("fastify"));
 const plugins_1 = __importDefault(require("./plugins"));
 const user_route_1 = require("./modules/user/user.route");
@@ -65,3 +65,10 @@ function startApp(server) {
     });
 }
 exports.startApp = startApp;
+function buildEmpty() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const fastify = (0, fastify_1.default)();
+        return fastify;
+    });
+}
+exports.buildEmpty = buildEmpty;

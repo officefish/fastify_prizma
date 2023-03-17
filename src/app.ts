@@ -27,6 +27,7 @@ async function buildApp(options: AppOptions = {}) {
     fastify.register(plugins.SwaggerPlugin)
 
     fastify.register(plugins.PothosPlugin)
+
     /* Here we should register all gql query fields */
     fastify.register(BuildUserQuery)
     fastify.register(BuildPostQuery)
@@ -39,7 +40,7 @@ async function buildApp(options: AppOptions = {}) {
     return fastify
 }
 
-async function startApp(server:FastifyInstance) {
+async function startApp(server:FastifyInstance, host:string, port:number) {
     
     server.get('/healthcheck', async function() {
         return { status: 'ok' }
@@ -47,8 +48,8 @@ async function startApp(server:FastifyInstance) {
   
     try {
       await server.listen({
-        port: 8001,
-        host: '0.0.0.0',
+        port: port,
+        host: host,
       })  
     } catch (err) {
       server.log.error(err)
@@ -56,4 +57,10 @@ async function startApp(server:FastifyInstance) {
     }
 }
 
-export { buildApp, startApp }
+
+async function buildEmpty () {
+  const fastify = Fastify()
+  return fastify
+}
+
+export { buildApp, buildEmpty, startApp }
