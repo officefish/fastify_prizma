@@ -1,5 +1,7 @@
 import fp from 'fastify-plugin'
 
+import User from '../../../prisma/pothos-types'
+
 const buildQuery = fp(async (server) => {
 
     const builder = server.schema.builder
