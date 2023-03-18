@@ -177,18 +177,18 @@ function createJwt(...data) {
 // Creates cookies containing access and refresh tokens.
 export async function createTokens(userId, sessionToken, reply) {
   try {
-    const accessToken = jwt.sign({userId, sessionToken}, JWT_SIGNATURE);
-    let expires = new Date();
-    expires.setMinutes(expires.getMinutes() + ACCESS_TOKEN_MINUTES);
-    createCookie(reply, 'access-token', accessToken, expires);
+    const accessToken = jwt.sign({userId, sessionToken}, JWT_SIGNATURE)
+    let expires = new Date()
+    expires.setMinutes(expires.getMinutes() + ACCESS_TOKEN_MINUTES)
+    createCookie(reply, 'access-token', accessToken, expires)
 
-    const refreshToken = jwt.sign({sessionToken}, JWT_SIGNATURE);
+    const refreshToken = jwt.sign({sessionToken}, JWT_SIGNATURE)
     expires = new Date();
-    expires.setDate(expires.getDate() + REFRESH_TOKEN_DAYS);
-    createCookie(reply, 'refresh-token', refreshToken, expires);
+    expires.setDate(expires.getDate() + REFRESH_TOKEN_DAYS)
+    createCookie(reply, 'refresh-token', refreshToken, expires)
   } catch (e) {
-    console.error('createTokens error:', e);
-    throw new Error('error refreshing tokens');
+    console.error('createTokens error:', e)
+    throw new Error('error refreshing tokens')
   }
 }
 

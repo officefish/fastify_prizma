@@ -17,6 +17,8 @@ interface Context {
 
 const mercuriusPlugin = fp(async (server) => {
 
+    //await server.after()
+
     const builder = server.schema.builder
     builder.queryType({
         fields: t => ({})

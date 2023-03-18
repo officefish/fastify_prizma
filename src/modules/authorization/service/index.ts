@@ -1,5 +1,6 @@
 
 import { GetUser } from "./user.service"
+import { CreateUser } from "./user.service"
 import { UpdatePassword } from "./user.service"
 import { GetSession } from "./session.service"
 import { UpdateSession } from "./session.service"
@@ -12,6 +13,7 @@ import { GetExpires } from "./cookie.service"
 
 export default {
     GetUser,
+    CreateUser,
     UpdatePassword,
     GetSession,
     UpdateSession,

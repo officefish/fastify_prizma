@@ -1,4 +1,5 @@
 import { FastifyReply } from "fastify"
+import { CookieOptions } from "../../../plugins/auth/cookie-plugin"
 
 function getExpires(delay: number): Date {
     let expires = new Date()
@@ -6,12 +7,13 @@ function getExpires(delay: number): Date {
     return expires
 }
 
-function createCookie(cookie:any,
+function createCookie(cookieOptions:CookieOptions,
     reply:FastifyReply, 
     fieldName:string, fieldValue:string, 
     expires:Date
     ) : any {
-    return 
+        reply
+        .setCookie(fieldName, fieldValue, {...cookieOptions, expires:expires}) 
 }
 
 export { 

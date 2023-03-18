@@ -22,14 +22,18 @@ async function buildApp(options: AppOptions = {}) {
 
     fastify.register(plugins.DotEnvPlugin)
     fastify.register(plugins.ShutdownPlugin)
-    fastify.register(plugins.AuthPlugin)
-    fastify.register(plugins.PrismaPlugin)
+    
+    fastify.register(plugins.JwtPlugin)
+    fastify.register(plugins.CookiePlugin)
     fastify.register(plugins.MinCryptoPlugin)
-    fastify.register(plugins.SwaggerPlugin)
 
+    fastify.register(plugins.PrismaPlugin)
     fastify.register(plugins.PothosPlugin)
 
-    /* Here we should register all gql query fields */
+    fastify.register(plugins.SwaggerPlugin)
+
+    /* Here we should register all gql query fields. 
+    Using before mercurius plugin init for build all qraphql schemas */
     fastify.register(BuildUserQuery)
     fastify.register(BuildPostQuery)
     fastify.register(BuildProductQuery)

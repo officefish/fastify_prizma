@@ -46,6 +46,6 @@ const jwtPlugin = fp(async (server) => {
 })
 
 export { 
-    jwtPlugin as AuthPlugin,
+    jwtPlugin as JwtPlugin,
     UnivocalJwt, UserPayload, JwtExpPayload 
 }

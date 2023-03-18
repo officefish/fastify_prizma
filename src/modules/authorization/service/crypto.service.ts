@@ -1,7 +1,6 @@
 import { Bcrypt } from "../../../plugins/hash-plugin"
 
-async function hash (crypto:Bcrypt, payload:string, saltLength:number) {
-    const salt = await genSalt(crypto, saltLength)
+async function hash (crypto:Bcrypt, payload:string, salt:string)  {
     return await crypto.hash(payload, salt)
 }
 

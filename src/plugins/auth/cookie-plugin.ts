@@ -1,8 +1,53 @@
-/*! Not used now, but maybe in future */
+import fp from 'fastify-plugin'
+import fastifyCookie from '@fastify/cookie'
+//Maybe also need:
+//cookie-signature
+//@types/cookie-signature
 
+// Making cookies httpOnly prevents client-side scripts
+// and browser extensions from accessing them.
+// Making cookies "secure" requires the use of HTTPS
+// to transmit them instead of HTTP.
 
+export interface CookieOptions {
+    domain: string
+    httpOnly: boolean
+    path: string
+    secure: boolean 
+}
+
+declare module 'fastify' {
+    interface FastifyInstance {
+        cookieOptions: CookieOptions
+    }
+}
+
+const cookiePlugin = fp(async (server) => {
+    
+    const cookieOptions = {
+        domain: server.env.ROOT_DOMAIN,
+        httpOnly: server.env.COOKIE_HTTPONLY,
+        path: server.env.COOKIE_PATH,
+        secure: server.env.COOKIE_SECURE 
+    }
+    server.decorate('cookieOptions', cookieOptions)
+
+    // maybe wrong because COOKIE_SIGNATURE should be 32 length string
+    
+    server.register(fastifyCookie, {
+        secret: server.env.COOKIE_SIGNATURE,
+        hook: 'onRequest', // set to false to disable cookie autoparsing or set autoparsing on any of the following hooks: 'onRequest', 'preParsing', 'preHandler', 'preValidation'. default: 'onRequest'
+        parseOptions: {}
+    })
+
+})
+
+export { cookiePlugin as CookiePlugin }
+  
 // fastify
-//   .register(require('fastify-cookie'))
+//   app.register(fastifyCookie, {
+//     secret: process.env.COOKIE_SIGNATURE
+// })
 
 //   .register(require('fastify-caching'))
 
