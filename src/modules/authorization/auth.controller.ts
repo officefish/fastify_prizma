@@ -2,7 +2,9 @@
 import { FastifyReply } from "fastify/types/reply"
 import { FastifyRequest } from "fastify/types/request"
 
-import { ChangePasswordInput } from "./auth.schema"
+import { 
+  CreateUserInput, 
+  ChangePasswordInput } from "./auth.schema"
 
 import service from "./service"
 
@@ -35,53 +37,39 @@ async function getUser(request:FastifyRequest, reply:FastifyReply) {
     const prisma = request.server.prisma
 
     const accessToken = request.cookies['access-token'] as string
-    
+    console.log('accessToken:', accessToken)
     //const jwtPayload = jwt.decode(
     //  req.header('authorization')!
     //) as JwtExpPayload
 
     if (accessToken) {
-      // Verify that the access token is valid and decode it.
-      // This throws if accessToken is not valid.
-      // const decodedPayload =  jwt.verify(accessToken, JWT_SIGNATURE!, {
-      //   issuer: 'some',//process.env.JWT_ISSUER,
-      //   algorithms: ['HS256'],
-      // }) as UserPayload
-
       const decodedPayload = await jwt.verify(accessToken) as UserPayload
-      console.log(decodedPayload)
+      console.log('decodedPayload: ', decodedPayload)
       const user = await service.GetUser(prisma, decodedPayload.id)
-      // Get the record from the "user" collection
-      // with an id matching the one in the access token.
-    //   const user = await getCollection('user').findOne({
-    //     _id: ObjectID(decodedAccessToken.userId)
-    //   });
       return user
     } else {
       const refreshToken = request.cookies['refresh-token']
       if (refreshToken) {
-        
         // This throws if refreshToken is not valid.
-        const decodedRefreshToken = jwt.verify(refreshToken)
-  
-        const {sessionToken} = asObject(decodedRefreshToken)
+        const decodedRefreshToken = jwt.verify(refreshToken) as UserPayload
+        
         //const session = await getCollection('session').findOne({sessionToken})
-        const session = await service.GetSession(prisma, sessionToken)
+        const session = await service.GetSession(prisma, decodedRefreshToken.id)
   
         if (session && session.valid) {
-          // Find the user associated with this session.
-          const user = await service.GetUser(prisma, session.userId)
+          const user = await service.GetUser(prisma, session.ownerId)
           if (!user) throw new Error('user not found')
   
           // Create new access and refresh tokens for this session.
-          await createTokens(session.userId, sessionToken, request, reply)
+          await createTokens(session.ownerId, session.token, request, reply)
   
-          return user;
+          return user
         } else {
           throw new Error('no valid session found');
         }
       } else {
-        throw new Error('no access token or refresh token found');
+        //throw new Error('no access token or refresh token found');
+        // try to get token from bearer
       }
     }
 
@@ -109,7 +97,7 @@ async function changePassword(request:FastifyRequest<{
       const user = await getUser(request, reply)
   
       // Hash "oldPassword" and compare it to the current hashed password.
-      const matches = await service.Compare(bcrypt, oldPassword, user.password)
+      const matches = await service.Compare(bcrypt, oldPassword, user?.password || '')
       if (matches) {
         const hashedPassword = await service.MakeHash(bcrypt, newPassword, saltLength)
 
@@ -129,23 +117,55 @@ async function createTokens(userId:string, sessionToken:string, request:FastifyR
   const jwt = request.server.jwt
   const accessTokenDelay = request.server.env.ACCESS_TOKEN_MINUTES
   const refreshTokenDelay = request.server.env.REFRESH_TOKEN_DAYS
-  const cookie = {}
+  const cookieOptions = request.server.cookieOptions 
+
   try {
     const accessToken = jwt.sign({userId, sessionToken})
-    let expires = service.GetExpires(accessTokenDelay)
-    service.CreateCookie(cookie, reply, 'access-token', accessToken, expires)
+    const accessExpires = service.GetExpires(accessTokenDelay)
+    service.CreateCookie(cookieOptions, reply, 'access-token', accessToken, accessExpires)
 
     const refreshToken = jwt.sign({sessionToken})
-    expires = service.GetExpires(refreshTokenDelay)
-    service.CreateCookie(cookie, reply, 'refresh-token', refreshToken, expires)
+    const refreshExpires = service.GetExpires(refreshTokenDelay)
+    service.CreateCookie(cookieOptions, reply, 'refresh-token', refreshToken, refreshExpires)
   } catch (e) {
     console.error('createTokens error:', e);
     throw new Error('error refreshing tokens')
   }
 }
 
-async function createUser(request:FastifyRequest, reply:FastifyReply) {
+async function createUser(request:FastifyRequest<{
+  Body: CreateUserInput
+}>, reply:FastifyReply) {
+  const {email, password} = request.body
+  const saltLength = request.server.env.JWT_SALT_LENGTH
+  const bcrypt = request.server.bcrypt
+  const prisma = request.server.prisma
 
+  try {
+    const salt = await service.GenerateSalt(bcrypt, saltLength)
+    const hashedPassword = await service.MakeHash(bcrypt, password, salt)
+
+    const userData = {
+      email,
+      password:hashedPassword,
+      salt,
+      verified: false
+    }
+
+    // Insert a record into the "user" collection.
+    await service.CreateUser(prisma, userData)
+
+    // After successfully creating a new user, automatically log in.
+    await login(request, reply);
+
+    // Send email to user containing a link
+    // they can click to verify their account.
+    // Some operations could require the user to be verified.
+    await sendVerifyEmail(email);
+  } catch (e) {
+    console.error('createUser error:', e)
+    reply.code(500).send(e)
+  }
 }
 
 async function deleteCurrentUser(request:FastifyRequest, reply:FastifyReply) {
