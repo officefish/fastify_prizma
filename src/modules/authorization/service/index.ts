@@ -1,26 +1,40 @@
 
-import { GetUser } from "./user.service"
+import { GetUniqueUser } from "./user.service"
 import { CreateUser } from "./user.service"
 import { UpdatePassword } from "./user.service"
-import { GetSession } from "./session.service"
+import { CreateSession } from "./session.service"
+import { GetUniqueSession } from "./session.service"
 import { UpdateSession } from "./session.service"
 import { UpdatePasswordWithEmail } from "./user.service"
-import { MakeHash } from "./crypto.service"
+import { Hash } from "./crypto.service"
 import { Compare } from "./crypto.service"
 import { GenerateSalt } from "./crypto.service"
+import { Sign } from './crypto.service'
+import { Verify } from "./crypto.service"
 import { CreateCookie } from "./cookie.service"
-import { GetExpires } from "./cookie.service"
+import { NowPlusMinutes } from "./cookie.service"
+import { NowPlusDays } from "./cookie.service"
+import { IsMobile} from "./help.service"
+import { CreateJwt } from "./crypto.service"
+import { SendMail } from "./mail.service"
 
 export default {
-    GetUser,
+    GetUniqueUser,
     CreateUser,
     UpdatePassword,
-    GetSession,
+    CreateSession,
+    GetUniqueSession,
     UpdateSession,
     UpdatePasswordWithEmail,
-    MakeHash,
+    Hash,
     Compare,
     GenerateSalt,
+    CreateJwt,
+    Sign,
+    Verify,
     CreateCookie,
-    GetExpires
+    NowPlusMinutes,
+    NowPlusDays,
+    IsMobile,
+    SendMail
 }

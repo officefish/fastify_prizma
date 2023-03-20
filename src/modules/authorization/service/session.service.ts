@@ -1,13 +1,14 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, Prisma } from "@prisma/client"
+import Session from '@prisma/client'
 
 
+async function createSession(prisma:PrismaClient, data: Prisma.SessionUncheckedCreateInput) {
+    const session = await prisma.session.create({data})
+    return session
+}
 
-async function getSession(prisma:PrismaClient, token: string) {
-    const session = await prisma.session.findUnique({
-        where: {
-          token: token
-        },
-    })
+async function getUniqueSession(prisma:PrismaClient, data:Prisma.SessionWhereUniqueInput) {
+    const session = await prisma.session.findUnique({ where: data})
     return session
 }
 
@@ -16,5 +17,6 @@ async function updateSession(prisma:PrismaClient, sessionToken: string, newSessi
 }
 
 export { 
-    getSession as GetSession, 
+    createSession as CreateSession,
+    getUniqueSession as GetUniqueSession, 
     updateSession as UpdateSession }

@@ -1,22 +1,14 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, Prisma } from "@prisma/client"
 
-async function getUser(prisma:PrismaClient, userId: string) {
-    // Get the record from the "user" collection
-      // with an id matching the one in the access token.
-    //   const user = await getCollection('user').findOne({
-    //     _id: ObjectID(decodedAccessToken.userId)
-    //   });
-    const user = await prisma.user.findUnique({
-        where: {
-          id: userId,
-        },
-    })
+type d = Prisma.UserWhereUniqueInput
+
+async function getUniqueUser(prisma:PrismaClient,  data:Prisma.UserWhereUniqueInput) {
+    const user = await prisma.user.findUnique({where: data})
     return user
-
 }
 
-async function createUser(prisma:PrismaClient, data:any) {
-    const user = await prisma.user.create({ data })
+async function createUser(prisma:PrismaClient, data:Prisma.UserCreateInput) {
+    const user = await prisma.user.create({data})
     return user
 }
 
@@ -29,7 +21,7 @@ async function updatePasswordWithEmail(prisma:PrismaClient, email: string, newPa
 }
 
 export { 
-    getUser as GetUser, 
+    getUniqueUser as GetUniqueUser, 
     createUser as CreateUser, 
     updatePassword as UpdatePassword,
     updatePasswordWithEmail as UpdatePasswordWithEmail

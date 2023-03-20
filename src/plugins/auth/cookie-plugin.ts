@@ -1,5 +1,6 @@
 import fp from 'fastify-plugin'
 import fastifyCookie from '@fastify/cookie'
+import { CookieOptions } from '@fastify/session'
 //Maybe also need:
 //cookie-signature
 //@types/cookie-signature
@@ -9,12 +10,6 @@ import fastifyCookie from '@fastify/cookie'
 // Making cookies "secure" requires the use of HTTPS
 // to transmit them instead of HTTP.
 
-export interface CookieOptions {
-    domain: string
-    httpOnly: boolean
-    path: string
-    secure: boolean 
-}
 
 declare module 'fastify' {
     interface FastifyInstance {

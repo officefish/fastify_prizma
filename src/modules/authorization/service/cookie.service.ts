@@ -1,22 +1,26 @@
 import { FastifyReply } from "fastify"
-import { CookieOptions } from "../../../plugins/auth/cookie-plugin"
+import { CreateCookieInput } from "../auth.schema"
 
-function getExpires(delay: number): Date {
+function nowPlusMinutes(delay: number): Date {
     let expires = new Date()
     expires.setMinutes(expires.getMinutes() + delay)
     return expires
 }
 
-function createCookie(cookieOptions:CookieOptions,
-    reply:FastifyReply, 
-    fieldName:string, fieldValue:string, 
-    expires:Date
+function nowPlusDays(delay: number) :Date {
+    let expires = new Date()
+    expires.setDate(expires.getDate() + delay)
+    return expires
+}
+
+function createCookie(p:CreateCookieInput
     ) : any {
-        reply
-        .setCookie(fieldName, fieldValue, {...cookieOptions, expires:expires}) 
+        p.reply
+        .setCookie(p.name, p.value, p.options) 
 }
 
 export { 
     createCookie as CreateCookie,
-    getExpires as GetExpires
+    nowPlusDays as NowPlusDays,
+    nowPlusMinutes as NowPlusMinutes
 }

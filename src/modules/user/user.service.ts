@@ -6,7 +6,7 @@ async function createUser(prisma: PrismaClient, crypto:MinCrypto, input:CreateUs
     const {password, ...rest} = input
     const { hash, salt }  = crypto.hashPassword(password)
     const user = await prisma.user.create({ 
-        data: {...rest, salt, password: hash} 
+        data: {...rest, salt, password: hash, verified:false} 
     })
     return user
 }

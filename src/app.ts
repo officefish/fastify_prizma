@@ -7,6 +7,8 @@ import { UserSchemas } from './modules/user/user.schema'
 import { ProductRoutes } from './modules/product/product.route'
 import { ProductSchemas } from './modules/product/product.schema'
 
+import { AuthRoutes } from './modules/authorization/auth.route'
+
 import { BuildPostQuery } from './modules/post/post.query'
 import { BuildUserQuery } from './modules/user/user.query'
 import { BuildProductQuery } from './modules/product/product.query'
@@ -20,12 +22,16 @@ async function buildApp(options: AppOptions = {}) {
         fastify.addSchema(schema)
     }
 
-    fastify.register(plugins.DotEnvPlugin)
     fastify.register(plugins.ShutdownPlugin)
+
+    fastify.register(plugins.DotEnvPlugin)
+    fastify.register(plugins.MinCryptoPlugin)
+    fastify.register(plugins.MailPlugin)
     
     fastify.register(plugins.JwtPlugin)
     fastify.register(plugins.CookiePlugin)
-    fastify.register(plugins.MinCryptoPlugin)
+    /* Session plugin need cookie and minCrypto plugins */
+    fastify.register(plugins.SessionPlugin) 
 
     fastify.register(plugins.PrismaPlugin)
     fastify.register(plugins.PothosPlugin)
@@ -42,16 +48,25 @@ async function buildApp(options: AppOptions = {}) {
     
     fastify.register(UserRoutes, { prefix: 'api/users' })
     fastify.register(ProductRoutes, { prefix: 'api/products' })
+    fastify.register(AuthRoutes, {prefix: 'api/auth'})
     return fastify
 }
 
-async function startApp(server:FastifyInstance, host:string, port:number) {
+async function startApp(server:FastifyInstance) {
+
+    //await server.after()
+
+    server.log.info('Something important happened!')
     
     server.get('/healthcheck', async function() {
         return { status: 'ok' }
     })
-  
+
     try {
+      const port = server.env.ROOT_PORT || 8001
+      const host = server.env.ROOT_DOMAIN || '0.0.0.0'
+
+      console.log (port, host)
       await server.listen({
         port: port,
         host: host,
@@ -61,7 +76,6 @@ async function startApp(server:FastifyInstance, host:string, port:number) {
       process.exit(1)
     }
 }
-
 
 async function buildEmpty () {
   const fastify = Fastify()

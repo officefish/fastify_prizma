@@ -3,15 +3,15 @@ import { FastifyReply } from "fastify/types/reply"
 import { FastifyRequest } from "fastify/types/request"
 
 import { 
+  LoginInput,
   CreateUserInput, 
-  ChangePasswordInput } from "./auth.schema"
+  CreateTokensInput,
+  ChangePasswordInput,
+  SendVerifyEmailInput
+} from "./auth.schema"
 
 import service from "./service"
-
-// Load environment variables from the .env file into process.env.
-// JWT_SIGNATURE is a hard-to-guess string.
-
-import { UnivocalJwt, UserPayload, JwtExpPayload } from "../../plugins/auth/jwt-plugin"
+import { User } from "@prisma/client"
 
 
 async function getProtectedData(request:FastifyRequest, reply:FastifyReply) {
@@ -37,31 +37,27 @@ async function getUser(request:FastifyRequest, reply:FastifyReply) {
     const prisma = request.server.prisma
 
     const accessToken = request.cookies['access-token'] as string
-    console.log('accessToken:', accessToken)
-    //const jwtPayload = jwt.decode(
-    //  req.header('authorization')!
-    //) as JwtExpPayload
-
     if (accessToken) {
-      const decodedPayload = await jwt.verify(accessToken) as UserPayload
-      console.log('decodedPayload: ', decodedPayload)
-      const user = await service.GetUser(prisma, decodedPayload.id)
+      const decodedPayload = await service.Verify(jwt, accessToken) 
+      const user = await service.GetUniqueUser(prisma, {id:decodedPayload.id})
       return user
+
     } else {
       const refreshToken = request.cookies['refresh-token']
       if (refreshToken) {
-        // This throws if refreshToken is not valid.
-        const decodedRefreshToken = jwt.verify(refreshToken) as UserPayload
+        // This should throws if refreshToken is not valid. But we should check it
+        const decodedRefreshToken = await service.Verify(jwt, refreshToken)
         
-        //const session = await getCollection('session').findOne({sessionToken})
-        const session = await service.GetSession(prisma, decodedRefreshToken.id)
-  
+        const session = await service.GetUniqueSession(prisma, {token:decodedRefreshToken.id})
         if (session && session.valid) {
-          const user = await service.GetUser(prisma, session.ownerId)
+          const user = await service.GetUniqueUser(prisma, {id:session.userId})
           if (!user) throw new Error('user not found')
   
           // Create new access and refresh tokens for this session.
-          await createTokens(session.ownerId, session.token, request, reply)
+          await createTokenCookies({
+            userId: session.userId, 
+            sessionToken: session.token, 
+            request, reply})
   
           return user
         } else {
@@ -70,6 +66,9 @@ async function getUser(request:FastifyRequest, reply:FastifyReply) {
       } else {
         //throw new Error('no access token or refresh token found');
         // try to get token from bearer
+        //const jwtPayload = jwt.decode(
+        //  req.header('authorization')!
+        //) as JwtExpPayload
       }
     }
 
@@ -99,8 +98,8 @@ async function changePassword(request:FastifyRequest<{
       // Hash "oldPassword" and compare it to the current hashed password.
       const matches = await service.Compare(bcrypt, oldPassword, user?.password || '')
       if (matches) {
-        const hashedPassword = await service.MakeHash(bcrypt, newPassword, saltLength)
-
+        const salt = await service.GenerateSalt(bcrypt, saltLength)
+        const hashedPassword = await service.Hash(bcrypt, newPassword, salt)
         await service.UpdatePasswordWithEmail(prisma, unencodedEmail, hashedPassword)
         reply.send('changed password')
       } else {
@@ -113,20 +112,27 @@ async function changePassword(request:FastifyRequest<{
 
 }
 
-async function createTokens(userId:string, sessionToken:string, request:FastifyRequest, reply:FastifyReply) {
-  const jwt = request.server.jwt
-  const accessTokenDelay = request.server.env.ACCESS_TOKEN_MINUTES
-  const refreshTokenDelay = request.server.env.REFRESH_TOKEN_DAYS
-  const cookieOptions = request.server.cookieOptions 
+async function createTokenCookies(p: CreateTokensInput) {
+  const jwt = p.request.server.jwt
+  const accessTokenMinutes = p.request.server.env.ACCESS_TOKEN_MINUTES
+  const refreshTokenDays = p.request.server.env.REFRESH_TOKEN_DAYS
+  const cookieOptions = p.request.server.cookieOptions 
 
   try {
-    const accessToken = jwt.sign({userId, sessionToken})
-    const accessExpires = service.GetExpires(accessTokenDelay)
-    service.CreateCookie(cookieOptions, reply, 'access-token', accessToken, accessExpires)
+    const accessToken = await service.Sign(jwt, {userId: p.userId, sessionToken: p.sessionToken})
+    const accessExpires = service.NowPlusMinutes(accessTokenMinutes)
+    const accessOptions = {...cookieOptions, expires:accessExpires}
+    service.CreateCookie( {reply:p.reply, 
+      name:'access-token', value:accessToken, 
+      options:accessOptions})
 
-    const refreshToken = jwt.sign({sessionToken})
-    const refreshExpires = service.GetExpires(refreshTokenDelay)
-    service.CreateCookie(cookieOptions, reply, 'refresh-token', refreshToken, refreshExpires)
+    const refreshToken = await service.Sign(jwt, {sessionToken:p.sessionToken})
+    const refreshExpires = service.NowPlusDays(refreshTokenDays)
+    const refreshOptions = {...cookieOptions, expires:refreshExpires}
+    service.CreateCookie({reply: p.reply,
+      name: 'refresh-token', value: refreshToken,
+      options: refreshOptions})
+
   } catch (e) {
     console.error('createTokens error:', e);
     throw new Error('error refreshing tokens')
@@ -143,30 +149,51 @@ async function createUser(request:FastifyRequest<{
 
   try {
     const salt = await service.GenerateSalt(bcrypt, saltLength)
-    const hashedPassword = await service.MakeHash(bcrypt, password, salt)
-
-    const userData = {
-      email,
-      password:hashedPassword,
-      salt,
-      verified: false
-    }
+    const hashedPassword = await service.Hash(bcrypt, password, salt)
 
     // Insert a record into the "user" collection.
-    await service.CreateUser(prisma, userData)
+    const data = { email, password:hashedPassword, salt, verified: false }
+    await service.CreateUser(prisma, data)
 
     // After successfully creating a new user, automatically log in.
-    await login(request, reply);
+    await login(request, reply)
 
     // Send email to user containing a link
     // they can click to verify their account.
     // Some operations could require the user to be verified.
-    await sendVerifyEmail(email);
+    await sendVerifyEmail(request, email)
   } catch (e) {
     console.error('createUser error:', e)
     reply.code(500).send(e)
   }
 }
+
+async function sendVerifyEmail(request:FastifyRequest, email: string) {
+
+  const mailer = request.server.nodemailer
+
+  const domain = 'api.' + request.server.env.ROOT_DOMAIN
+  const link_expires = request.server.env.LINK_EXPIRE_MINUTES
+  const expires = service.NowPlusMinutes(link_expires).getTime().toString()
+  const encodedEmail = encodeURIComponent(email)
+
+  const crypto = request.server.minCrypto
+  const signature = request.server.env.JWT_SIGNATURE
+  
+  const emailToken = await service.CreateJwt(crypto, {signature, email, expires}, ':')
+  const link =
+    `https://${domain}/verify/` + `${encodedEmail}/${expires}/${emailToken}`
+
+  // Send an email containing a link that can be clicked
+  // to verify the associated user.
+  const subject = 'Verify your account'
+  const html =
+    'Click the link below to verify your account.<br><br>' +
+    `<a href="${link}">VERIFY</a>`
+  //return sendEmail({to: email, subject, html})
+  return await service.SendMail(mailer, {to: email, subject, html})
+}
+
 
 async function deleteCurrentUser(request:FastifyRequest, reply:FastifyReply) {
 
@@ -200,7 +227,69 @@ async function login2FA(request:FastifyRequest, reply:FastifyReply) {
 
 }
 
+async function login(request:FastifyRequest<{
+  Body: LoginInput
+}>, reply:FastifyReply) 
+{
+  const {email, password} = request.body
+  const prisma = request.server.prisma
+  const bcrypt = request.server.bcrypt
+  try {
+      const user = await service.GetUniqueUser(prisma, {email})
+      if (user && user.verified) {
+        
+        const doubleCheck = await service.Compare(bcrypt, user.password, password)
+        if (!doubleCheck) {
+          throw new Error('User seems varified in system, but password is incorrect')
+        }
+        // If the user has enabled two-factor authentication (2FA) ...
+        // Don't login until a 2FA code is provided.
+        if (user.secret) { 
+          reply.send({userId: user.id, status: '2FA'})
+        
+        } else {
+          // 2FA is not enabled for this account,
+          // so create a new session for this user.
+          await createSession(request, reply, user)
+          reply.send('logged in')
+        }
+    } else {
+      reply.code(401).send('invalid email or password')
+    }
+  } catch (e) {
+    console.error('login error:', e)
+    reply.code(500).send(e)
+  }
+}
+
+async function logout(request:FastifyRequest, reply:FastifyReply) {
+
+}
+
+async function createSession(request:FastifyRequest, reply:FastifyReply, user:User) {
+  const tokenLength = request.server.env.SESSION_TOKEN_LENGTH
+  const bcrypt = request.server.bcrypt
+  const prisma = request.server.prisma
+  const sessionToken = await service.GenerateSalt(bcrypt, tokenLength) 
+
+  try {    
+    const userAgent = request.headers['user-agent'] || ''
+    await service.CreateSession(prisma, {
+      userId: user.id,
+      token: sessionToken,
+      isMobile:service.IsMobile(userAgent),
+      userAgent
+    })
+    // Create cookies containing access and refresh tokens.
+    await createTokenCookies({ userId: user.id, sessionToken, request, reply})
+  } catch (e) {
+    throw new Error('session creation failed')
+  }
+}
+
 export { 
+    login as LoginHandler, 
+    logout as LogoutHandler,
     getProtectedData as GetProtectedDataHandler,
     getUnprotectedData as GetUnprotectedDataHandler,
     getUser as GetUserHandler,

@@ -329,6 +329,14 @@
     http-errors "2.0.0"
     mime "^3.0.0"
 
+"@fastify/session@^10.1.1":
+  version "10.1.1"
+  resolved "https://registry.yarnpkg.com/@fastify/session/-/session-10.1.1.tgz#71b8071b5420525b6ca7cb7d4e587b5b1404ea83"
+  integrity sha512-8pKDTL9MuqU1FCTca6XNd1E4quZ/ipik69AHXqkANia9Z4xPFS5OSKIwmCClIdaMYD32/tPu4G/6wGgK5Buj5g==
+  dependencies:
+    fastify-plugin "^4.0.0"
+    safe-stable-stringify "^2.3.1"
+
 "@fastify/static@^6.0.0":
   version "6.9.0"
   resolved "https://registry.yarnpkg.com/@fastify/static/-/static-6.9.0.tgz#038efdfe33757cc0ab4b0920e82bc4240fa5d78a"
@@ -644,6 +652,13 @@
   version "18.15.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.15.1.tgz#41dc2bf78e8085a250d4670d95edb7fba621dd29"
   integrity sha512-U2TWca8AeHSmbpi314QBESRk7oPjSZjDsR+c+H4ECC1l+kFgpZf8Ydhv3SJpPy51VyZHHqxlb6mTTqYNNRVAIw==
+
+"@types/nodemailer@^6.4.4":
+  version "6.4.7"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-6.4.7.tgz#658f4bca47c1a895b1d7e054b3b54030a5e1f5e0"
+  integrity sha512-f5qCBGAn/f0qtRcd4SEn88c8Fp3Swct1731X4ryPKqS61/A3LmmzN8zaEz7hneJvpjFbUUgY7lru/B/7ODTazg==
+  dependencies:
+    "@types/node" "*"
 
 "@types/prop-types@*":
   version "15.7.5"
@@ -1645,6 +1660,15 @@ fastify-caching@^6.3.0:
   dependencies:
     fastify-caching-deprecated "npm:fastify-caching@6.2.0"
     process-warning "^1.0.0"
+
+fastify-mail@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/fastify-mail/-/fastify-mail-1.0.5.tgz#7272427f777bea77840f22ccc63013f509287b23"
+  integrity sha512-pgZk49GPZung9Nxh9zghUOZZtfxElFHeAyyM4wykta1Gg23x6A2j2jSoXipY5PToYQ6ubNBLCyitVHXyVBc6ZQ==
+  dependencies:
+    "@types/nodemailer" "^6.4.4"
+    fastify-plugin "^3.0.1"
+    nodemailer "^6.7.5"
 
 fastify-plugin@^3.0.0, fastify-plugin@^3.0.1:
   version "3.0.1"
@@ -2671,6 +2695,11 @@ node-releases@^2.0.8:
   version "2.0.10"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.10.tgz#c311ebae3b6a148c89b1813fd7c4d3c024ef537f"
   integrity sha512-5GFldHPXVG/YZmFzJvKK2zDSzPKhEp0+ZR5SVaoSag9fsL5YgHbUHDfnG5494ISANDcK4KwPXAx2xqVEydmd7w==
+
+nodemailer@^6.7.5:
+  version "6.9.1"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.1.tgz#8249d928a43ed85fec17b13d2870c8f758a126ed"
+  integrity sha512-qHw7dOiU5UKNnQpXktdgQ1d3OFgRAekuvbJLcdG5dnEo/GtcTHRYM7+UfJARdOFU9WUQO8OiIamgWPmiSFHYAA==
 
 nodemon@^2.0.21:
   version "2.0.21"
