@@ -16,7 +16,8 @@ const swaggerPlugin = fp(async (server) => {
             tags: [
                 { name: 'auth', description: 'Authorize User related end-points.' },
                 { name: 'user', description: 'User related end-points.' },
-                { name: 'password', description: 'User password related end-points.' }
+                { name: 'password', description: 'User password related end-points.' },
+                { name: 'session', description: 'User session related end-points.' }
               ],
         }
     }))
@@ -26,10 +27,10 @@ const swaggerPlugin = fp(async (server) => {
             docExpansion: 'list',
             deepLinking: false
         },
-        uiHooks: {
-            onRequest: function (request, reply, next) { next() },
-            preHandler: function (request, reply, next) { next() }
-        },
+        // uiHooks: {
+        //     onRequest: function (request, reply, next) { next() },
+        //     preHandler: function (request, reply, next) { next() }
+        // },
         staticCSP: true,
         transformStaticCSP: (header) => header,
         transformSpecification: (swaggerObject, request, reply) => { return swaggerObject },

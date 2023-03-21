@@ -9,6 +9,7 @@ import { DotEnvPlugin } from "./dotenv-plugin"
 import { CookiePlugin } from "./auth/cookie-plugin"
 import { SessionPlugin } from "./auth/session-plugin"
 import { MailPlugin } from "./mail-plugin"
+import { AuthPlugin } from "./auth/auth-plugin"
 
 export { MinCrypto } from "./min-crypto-plugin"
 
@@ -16,6 +17,7 @@ export default {
     DotEnvPlugin,
     PrismaPlugin,
     MailPlugin,
+    AuthPlugin,
     SessionPlugin,
     MinCryptoPlugin,
     JwtPlugin,

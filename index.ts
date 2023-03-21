@@ -1,5 +1,4 @@
 import { buildApp, startApp, AppOptions, buildEmpty } from './src/app'
-import { mock } from './src/services/mock.service'
 
 const options: AppOptions = {
     logger: true,

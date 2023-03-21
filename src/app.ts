@@ -8,6 +8,7 @@ import { ProductRoutes } from './modules/product/product.route'
 import { ProductSchemas } from './modules/product/product.schema'
 
 import { AuthRoutes } from './modules/authorization/auth.route'
+import { AuthSchemas } from './modules/authorization/auth.schema'
 
 import { BuildPostQuery } from './modules/post/post.query'
 import { BuildUserQuery } from './modules/user/user.query'
@@ -18,7 +19,7 @@ export type AppOptions = Partial<FastifyServerOptions>
 async function buildApp(options: AppOptions = {}) {
     const fastify = Fastify(options)
 
-    for (const schema of [...UserSchemas, ...ProductSchemas]) {
+    for (const schema of [...AuthSchemas, ...UserSchemas, ...ProductSchemas]) {
         fastify.addSchema(schema)
     }
 
@@ -47,9 +48,9 @@ async function buildApp(options: AppOptions = {}) {
     /* Should be registered before routes */
     fastify.register(plugins.SwaggerPlugin)
 
-    //fastify.register(UserRoutes, { prefix: 'api/users' })
+    fastify.register(UserRoutes, { prefix: 'api/users' })
     fastify.register(ProductRoutes, { prefix: 'api/products' })
-    fastify.register(AuthRoutes, {prefix: 'api/'})
+    fastify.register(AuthRoutes, {prefix: 'api/auth'})
 
     
 

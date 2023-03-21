@@ -1,5 +1,4 @@
-import { FastifyReply } from "fastify"
-import { CreateCookieInput } from "../auth.schema"
+import { CreateCookieInput } from "../modules/authorization/auth.schema"
 
 function nowPlusMinutes(delay: number): Date {
     let expires = new Date()

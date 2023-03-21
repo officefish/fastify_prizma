@@ -13,37 +13,51 @@ const password = {
         invalid_type_error: 'Password must be a string',
     })
 }
-const name = { name: z.string() }
+const name = { name: z.string().optional() }
 const id = { id: z.string() }
+
+const changePassword = {
+    ...email,
+    oldPassword: z.string(),
+    newPassword: z.string().min(6),
+}
+
+const uniqueUser = {
+    email: z.string().email().optional(),
+    id: z.string().optional()
+}
+const uniqueUserSchema = z.object({
+    ...uniqueUser
+})
 
 const createUserSchema = z.object({
     ...email,
     ...password,
     ...name,
 })
-
-const createUserResponseSchema = z.object({
+const userResponseSchema = z.object({
     ...id,
     ...name,
     ...email,
 })
 
-const loginUserSchema = z.object({
-    ...email,
-    ...password,
+const changedPasswordSchema = z.object({
+    ...changePassword,
 })
 
-const loginUserResponseSchema = z.object({
-    accessToken: z.string(),
-})
-
+type ChangePasswordInput = z.infer<typeof changedPasswordSchema>
 type CreateUserInput = z.infer<typeof createUserSchema>
-type LoginInput = z.infer<typeof loginUserSchema>
-export { CreateUserInput, LoginInput }
+type UniqueUserInput = z.infer<typeof uniqueUserSchema>
+
+export { 
+    CreateUserInput, 
+    ChangePasswordInput,
+    UniqueUserInput
+}
 
 export const {schemas:UserSchemas, $ref} = buildJsonSchemas({
     createUserSchema,
-    createUserResponseSchema,
-    loginUserSchema,
-    loginUserResponseSchema
+    uniqueUserSchema,
+    userResponseSchema,
+    changedPasswordSchema
 }, {$id: 'UserSchema'})

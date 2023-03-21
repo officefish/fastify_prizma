@@ -1,7 +1,7 @@
 import { JWT } from "@fastify/jwt"
-import { UserPayload } from "../../../plugins/auth/jwt-plugin"
+import { UserPayload } from "../plugins/auth/jwt-plugin"
 import { SignPayloadType, SignOptions } from "@fastify/jwt"
-import { MinCrypto, Bcrypt, JwtOptions } from "../../../plugins/min-crypto-plugin"
+import { MinCrypto, Bcrypt, JwtOptions } from "../plugins/min-crypto-plugin"
 
 async function hash (crypto:Bcrypt, payload:string, salt:string)  {
     return await crypto.hash(payload, salt)

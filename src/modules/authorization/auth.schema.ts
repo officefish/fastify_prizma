@@ -1,64 +1,65 @@
-import {string, z} from 'zod'
+import {z} from 'zod'
 import { buildJsonSchemas } from 'fastify-zod'
 
 import { FastifyReply } from "fastify/types/reply"
 import { FastifyRequest } from "fastify/types/request"
 import { CookieOptions } from '@fastify/session'
 
-const createUser = {
-    email: z.string().email(),
-    password: z.string().min(6),
+const email = {
+    email: z.string({
+        required_error: 'Email is required',
+        invalid_type_error: 'Email must be a string',
+    }).email()
 }
-
-const changePassword = {
-    email: z.string().email(),
-    oldPassword: z.string(),
-    newPassword: z.string().min(6),
+const password = {
+    password: z.string({
+        required_error: 'Password is required',
+        invalid_type_error: 'Password must be a string',
+    })
 }
+//const name = { name: z.string().optional() }
+//const id = { id: z.string() }
 
-const minimumUserSchema = z.object({
-    ...createUser,
+const loginUserSchema = z.object({
+    ...email,
+    ...password,
+})
+const loginUserResponseSchema = z.object({
+    accessToken: z.string(),
 })
 
-const changedPasswordSchema = z.object({
-    ...changePassword,
-})
+type LoginInput = z.infer<typeof loginUserSchema>
 
-export type ChangePasswordInput = z.infer<typeof changedPasswordSchema>
-export type CreateUserInput = z.infer<typeof minimumUserSchema>
-export type LoginInput = z.infer<typeof minimumUserSchema>
-
-const minimumSession = {
-    token: z.string().min(32),
-    userId: z.string()
-}
-
-const newSession = {
-    ...minimumSession,
-    userAgent: z.string(),
-    valid: z.boolean().optional()
-}
-
-const newSessionSchema = z.object({...newSession})
-export type NewSessionInput = z.infer<typeof newSessionSchema >
-
-export type CreateTokensInput = {
+type CreateTokensInput = {
     userId: string, 
     sessionToken: string, 
     request: FastifyRequest, 
     reply: FastifyReply
 }
 
-export type CreateCookieInput = {
+type CreateCookieInput = {
     reply:FastifyReply, 
     name:string, 
     value:string, 
     options:CookieOptions,
 }
 
-export type SendVerifyEmailInput = {
+type SendVerifyEmailInput = {
     email: string,
     domain: string,
     expires: number
 }
+
+export { 
+    LoginInput,
+    CreateCookieInput,
+    CreateTokensInput,
+    SendVerifyEmailInput
+}
+
+export const {schemas:AuthSchemas, $ref} = buildJsonSchemas({
+    loginUserSchema,
+    loginUserResponseSchema,
+}, {$id: 'AuthSchema'})
+
 

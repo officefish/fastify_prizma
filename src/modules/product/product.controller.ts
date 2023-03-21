@@ -1,8 +1,8 @@
 import { FastifyReply } from "fastify/types/reply"
 import { FastifyRequest } from "fastify/types/request"
-import { userIdFromRequest } from "../../services"
 import { CreateProductInput } from "./product.schema"
 import { CreateProductService, GetManyProductsService } from "./product.service"
+import { UserPayload } from "../../plugins/auth/jwt-plugin"
 
 async function createProduct(
     request: FastifyRequest<{
@@ -10,7 +10,8 @@ async function createProduct(
     }>, reply:FastifyReply) {
 
     const prisma = request.server.prisma
-    const ownerId = userIdFromRequest(request, reply)
+    const user = request.user as UserPayload
+    const ownerId = user.id//userIdFromRequest(request, reply)
     console.log(request)
     console.log(ownerId)
 
