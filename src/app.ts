@@ -22,7 +22,7 @@ async function buildApp(options: AppOptions = {}) {
         fastify.addSchema(schema)
     }
 
-    fastify.register(plugins.ShutdownPlugin)
+    //fastify.register(plugins.ShutdownPlugin)
 
     fastify.register(plugins.DotEnvPlugin)
     fastify.register(plugins.MinCryptoPlugin)
@@ -36,8 +36,6 @@ async function buildApp(options: AppOptions = {}) {
     fastify.register(plugins.PrismaPlugin)
     fastify.register(plugins.PothosPlugin)
 
-    fastify.register(plugins.SwaggerPlugin)
-
     /* Here we should register all gql query fields. 
     Using before mercurius plugin init for build all qraphql schemas */
     fastify.register(BuildUserQuery)
@@ -45,32 +43,50 @@ async function buildApp(options: AppOptions = {}) {
     fastify.register(BuildProductQuery)
 
     fastify.register(plugins.MercuriusPlugin)
-    
-    fastify.register(UserRoutes, { prefix: 'api/users' })
+
+    /* Should be registered before routes */
+    fastify.register(plugins.SwaggerPlugin)
+
+    //fastify.register(UserRoutes, { prefix: 'api/users' })
     fastify.register(ProductRoutes, { prefix: 'api/products' })
-    fastify.register(AuthRoutes, {prefix: 'api/auth'})
+    fastify.register(AuthRoutes, {prefix: 'api/'})
+
+    
+
     return fastify
 }
 
 async function startApp(server:FastifyInstance) {
-
-    //await server.after()
-
-    server.log.info('Something important happened!')
     
-    server.get('/healthcheck', async function() {
+    server.ready(err => {
+      if (err) server.log.error(err)
+      console.log(server.printRoutes())
+    })
+
+    server.get('/healthcheck', (request) => {
         return { status: 'ok' }
+    })
+
+    server.get('/', (request, reply) => {
+      console.log(request.cookies)
+      //console.log(request.session)
+      reply
+        .send(request.cookies.sessionId)
     })
 
     try {
       const port = server.env.ROOT_PORT || 8001
       const host = server.env.ROOT_DOMAIN || '0.0.0.0'
 
-      console.log (port, host)
       await server.listen({
         port: port,
         host: host,
+      }, (err) => {
+        if (err) server.log.error(err)
       })  
+
+      await server.after() 
+      
     } catch (err) {
       server.log.error(err)
       process.exit(1)

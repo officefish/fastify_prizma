@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = require("./app");
+const app_1 = require("./src/app");
 const options = {
     logger: true,
 };
 const start = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = yield (0, app_1.buildApp)(options);
-    (0, app_1.startApp)(app);
+    yield (0, app_1.startApp)(app);
 });
 start();

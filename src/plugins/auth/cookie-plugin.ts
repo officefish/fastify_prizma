@@ -1,6 +1,8 @@
 import fp from 'fastify-plugin'
-import fastifyCookie from '@fastify/cookie'
-import { CookieOptions } from '@fastify/session'
+import { fastifyCookie } from '@fastify/cookie'
+import type { FastifyCookieOptions } from '@fastify/cookie'
+
+//import { CookieOptions } from '@fastify/session'
 //Maybe also need:
 //cookie-signature
 //@types/cookie-signature
@@ -13,7 +15,7 @@ import { CookieOptions } from '@fastify/session'
 
 declare module 'fastify' {
     interface FastifyInstance {
-        cookieOptions: CookieOptions
+        cookieOptions: FastifyCookieOptions
     }
 }
 
@@ -28,13 +30,20 @@ const cookiePlugin = fp(async (server) => {
     server.decorate('cookieOptions', cookieOptions)
 
     // maybe wrong because COOKIE_SIGNATURE should be 32 length string
+    const secretLength = server.env.SESSION_TOKEN_LENGTH
+    const secret = server.env.COOKIE_SIGNATURE//await server.bcrypt.genSalt(256)
+    console.log(secret)
     
     server.register(fastifyCookie, {
-        secret: server.env.COOKIE_SIGNATURE,
+        secret,
         hook: 'onRequest', // set to false to disable cookie autoparsing or set autoparsing on any of the following hooks: 'onRequest', 'preParsing', 'preHandler', 'preValidation'. default: 'onRequest'
-        parseOptions: {}
+        parseOptions: cookieOptions
+    } as FastifyCookieOptions)
+    .ready((err) => {
+        if (err) console.error(err)  
     })
-
+    //await server.after()
+    server.log.info('Cookie Plugin Installed.')
 })
 
 export { cookiePlugin as CookiePlugin }

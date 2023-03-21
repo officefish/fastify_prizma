@@ -33,6 +33,9 @@ const postQuery = fp(async (server) => {
           resolve: () => { return [new Post('Пост 1', 'описание к посту 1') ] },
         }),
     }))
+
+    //await server.after()
+    server.log.info('Post gql api added.')
 })
 
 export { postQuery as BuildPostQuery }

@@ -59,24 +59,107 @@ async function routes(server:FastifyInstance) {
     });
     */
 
-    server.post('/login', {}, LoginHandler)
-    server.get('/logout', {}, LogoutHandler)
+    /* Auth api */
+    server.post('auth/login', {
+      schema: {
+        description: 'User login',
+        tags: ['auth'],
+      }
+    }, LoginHandler)
+
+    server.get('auth/logout', {
+      schema: {
+        description: 'User logout',
+        tags: ['auth'],
+      }
+    }, LogoutHandler)
+
+    server.get('auth/verify/:email/:expires/:token', {
+      schema: {
+        description: 'User token verification.',
+        tags: ['auth'],
+      }
+    }, VerifyUserHandler)
+
+    server.post('auth/2fa/register', {
+      schema: {
+        description: 'Two factor authorization register.',
+        tags: ['auth'],
+      }
+    }, Register2FAHandler)
+    server.post('auth/2fa/login', {
+      schema: {
+        description: 'Two factor authorization login.',
+        tags: ['auth'],
+      }
+    }, Login2FAHandler)
+
+    /* User api. Seems it should be in user module. */
+    server.post('/user', {
+      schema: {
+        description: 'Create new User.',
+        tags: ['user'],
+      }
+    }, CreateUserHandler)
+    
+    server.get('/user', {
+      schema: {
+        description: 'Get user minimum auth data.',
+        tags: ['user'],
+      }
+    }, GetUserHandler)
+
+    server.delete('/user', {
+      schema: {
+        description: 'Delete authorized user.',
+        tags: ['user'],
+      }
+    }, DeleteCurrentUserHandler)
+    
+    server.delete('/user/:email', {
+      schema: {
+        description: 'Delete user with email ???',
+        tags: ['user'],
+      }
+    }, DeleteUserHandler)
+
+    /* User api associated with his password. */
+
+    server.get('/user/reset/:email/:expires/:token', {
+      schema: {
+        description: 'Get user password with token???',
+        tags: ['password'],
+      }
+    }, GetNewPasswordHandler)
+
+    server.post('/user/password', {
+      schema: {
+        description: 'Change user password',
+        tags: ['password'],
+      }
+    }, ChangePasswordHandler)
+
+    server.get('/user/forgot-password/:email', {
+      schema: {
+        description: 'Forgot password ???',
+        tags: ['password'],
+      }
+    }, ForgotPasswordHandler)
+
+    server.post('/user/reset', {
+      schema: {
+        description: 'Reset User password.',
+        tags: ['password'],
+      }
+    }, ResetPasswordHandler)
+    
+    server.delete('/user/:email/sessions', {}, DeleteUserSessionsHandler)
 
     server.get('/protected', {}, GetProtectedDataHandler)
     server.get('/unprotected', {}, GetUnprotectedDataHandler)
 
-    server.get('/user', {}, GetUserHandler)
-    server.get('/user/forgot-password/:email', {}, ForgotPasswordHandler)
-    server.post('/user/password', {}, ChangePasswordHandler)
-    server.post('/user', {}, CreateUserHandler)
-    server.delete('/user', {}, DeleteCurrentUserHandler)
-    server.delete('/user/:email', {}, DeleteUserHandler)
-    server.delete('/user/:email/sessions', {}, DeleteUserSessionsHandler)
-    server.get('/user/reset/:email/:expires/:token', {}, GetNewPasswordHandler)
-    server.post('/user/reset', {}, ResetPasswordHandler)
-    server.get('/verify/:email/:expires/:token', {}, VerifyUserHandler)
-    server.post('/2fa/register', {}, Register2FAHandler)
-    server.post('/2fa/login', {}, Login2FAHandler)
+    //await server.after()
+    server.log.info('Auth routes added.')
 }
 
 export { routes as AuthRoutes}

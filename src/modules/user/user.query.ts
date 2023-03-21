@@ -42,6 +42,9 @@ const buildQuery = fp(async (server) => {
             context.prisma.user.findMany({...query})
         })
     }))
+
+    //await server.after()
+    server.log.info('User gql api added.')
 })
 
 export { buildQuery as BuildUserQuery }

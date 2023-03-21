@@ -70,7 +70,10 @@ const minCryptoPlugin = fp(async (server) => {
     const minCrypto = await new MinCrypto()
     server.decorate('bcrypt', { hash, compare, genSalt })
     server.decorate('minCrypto', minCrypto)
-    await server.after()
+    
+    //await server.after()
+    
+    server.log.info('MinCrypto Plugin Installed.')
 })
 
 export { 

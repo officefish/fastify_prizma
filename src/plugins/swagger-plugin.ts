@@ -10,9 +10,14 @@ const swaggerPlugin = fp(async (server) => {
         exposeRoute: true,
         openapi: {
             info: {
-            title: 'Techies blog API',
-            version: version,
-            }
+                title: 'Techies blog API',
+                version: version,
+            },
+            tags: [
+                { name: 'auth', description: 'Authorize User related end-points.' },
+                { name: 'user', description: 'User related end-points.' },
+                { name: 'password', description: 'User password related end-points.' }
+              ],
         }
     }))
     server.register(swaggerUI, {
@@ -30,6 +35,9 @@ const swaggerPlugin = fp(async (server) => {
         transformSpecification: (swaggerObject, request, reply) => { return swaggerObject },
         transformSpecificationClone: true,    
     })
+
+    //await server.after()
+    server.log.info('Swagger plugin installed.')
 })
 
 export { swaggerPlugin as SwaggerPlugin }

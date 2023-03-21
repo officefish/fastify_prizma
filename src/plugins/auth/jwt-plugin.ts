@@ -36,13 +36,18 @@ const jwtPlugin = fp(async (server) => {
     server.decorate('authenticate', AuthenticateHandler)
     server.decorate('user', {})
     server.register(jwt, { secret: server.env.JWT_SIGNATURE })
+    .ready((err) => {
+        if (err) console.error(err)  
+    })
     
     server.addHook('onRoute', (routeOptions) => {
         if (routeOptions.url === '/graphql') {
-          //routeOptions.preValidation = [server.authenticate]
           routeOptions.preHandler = [server.initialize]
         }
     })
+   
+    //await server.after()
+    server.log.info('Jwt Plugin Installed.')
 })
 
 export { 

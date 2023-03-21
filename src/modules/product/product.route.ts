@@ -20,7 +20,10 @@ async function routes(server:FastifyInstance) {
                 201: $ref("productResponseSchema")
             }
         }
-    }, GetManyProductsHandler);
+    }, GetManyProductsHandler)
+
+    //await server.after()
+    server.log.info('Product routes added.')
 }
 
 export { routes as ProductRoutes}

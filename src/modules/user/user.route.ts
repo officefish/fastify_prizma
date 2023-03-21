@@ -25,6 +25,9 @@ async function routes(server:FastifyInstance) {
     server.get('/', {
         preHandler: [server.authenticate]
     }, GetUsersHandler)
+
+    //await server.after()
+    server.log.info('User routes added.')
 }
 
 export { routes as UserRoutes } 

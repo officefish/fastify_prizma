@@ -28,6 +28,9 @@ const prismaPlugin = fp(async (server) => {
     server.addHook('onClose', async () =>  {
       await server.prisma.$disconnect()
     })
+
+    //await server.after()
+    server.log.info('Prisma Plugin Installed.')
 })
 
 export { prismaPlugin as PrismaPlugin }

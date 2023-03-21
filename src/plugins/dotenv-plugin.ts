@@ -1,47 +1,123 @@
 import fastifyEnv from "@fastify/env"
 import fp from 'fastify-plugin'
 
-import { buildJsonSchemas } from 'fastify-zod'
-import {z} from 'zod'
-
-const variables = {
-    'DB_PASSWORD': z.string(), 
-    'DB_USERNAME': z.string(), 
-    'ACCESS_TOKEN_MINUTES': z.number(),  
-    'LINK_EXPIRE_MINUTES': z.number(),  
-    'REFRESH_TOKEN_DAYS': z.number(),  
-    'SMTP_HOST': z.string(),
-    'SMTP_PORT': z.number(),
-    'SMTP_USE_TLS': z.boolean(),
-    'SMTP_LOGIN': z.string(),
-    'SMTP_PASSWORD': z.string(),
-    'FROM_EMAIL': z.string().email(),  
-    'SESSION_TOKEN_LENGTH': z.number(), 
-    'JWT_SIGNATURE': z.string(),
-    'JWT_SALT_LENGTH': z.number(), 
-    'ROOT_DOMAIN': z.string(),
-    'ROOT_PORT': z.number(), 
-    'COOKIE_SIGNATURE' : z.string(), 
-    'COOKIE_HTTPONLY': z.boolean(), 
-    'COOKIE_SECURE': z.boolean(), 
-    'COOKIE_PATH': z.string(),
-    'SESSION_SIGNATURE': z.string(), 
-} 
-
-const schema = z.object({
-    ...variables,
-}) 
-
-const {schemas:DotEnvSchema, $ref} = buildJsonSchemas({
-    schema,
-}, {$id: 'DotEnvSchema'})
-
-const options = {
-    confKey: 'env',
-    schema: $ref('schema'),
-    dotenv: true,
-    data: process.env
+const schema = {
+  type: 'object',
+  required: [ 
+    'DB_PASSWORD', 
+    'DB_USERNAME',  
+    'ACCESS_TOKEN_MINUTES',  
+    'LINK_EXPIRE_MINUTES',  
+    'REFRESH_TOKEN_DAYS',  
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'SMTP_USE_TLS',
+    'SMTP_LOGIN',
+    'SMTP_PASSWORD',
+    'FROM_EMAIL',  
+    'SESSION_TOKEN_LENGTH', 
+    'JWT_SIGNATURE',
+    'JWT_SALT_LENGTH', 
+    'ROOT_DOMAIN',
+    'ROOT_PORT', 
+    'COOKIE_SIGNATURE', 
+    'COOKIE_HTTPONLY', 
+    'COOKIE_SECURE', 
+    'COOKIE_PATH',
+    'SESSION_SIGNATURE' 
+  ],
+  properties: {
+    DB_PASSWORD: {
+      type: 'string'
+    }, 
+    DB_USERNAME: {
+      type: 'string'
+    },
+    ACCESS_TOKEN_MINUTES: {
+      type: 'number'
+    },  
+    LINK_EXPIRE_MINUTES: {
+      type: 'number'
+    },  
+    REFRESH_TOKEN_DAYS: {
+      type: 'number'
+    },  
+    SMTP_HOST: {
+      type: 'string'
+    },
+    SMTP_PORT: {
+      type: 'number'
+    },
+    SMTP_USE_TLS: {
+      type: 'boolean'
+    },
+    SMTP_LOGIN: {
+      type: 'string'
+    },
+    SMTP_PASSWORD: {
+      type: 'string'
+    },
+    FROM_EMAIL: {
+      type: 'string'
+    },   
+    SESSION_TOKEN_LENGTH: {
+      type: 'number'
+    }, 
+    JWT_SIGNATURE: {
+      type: 'string'
+    },
+    JWT_SALT_LENGTH: {
+      type: 'number'
+    }, 
+    ROOT_DOMAIN: {
+      type: 'string'
+    },
+    ROOT_PORT: {
+      type: 'number'
+    }, 
+    COOKIE_SIGNATURE: {
+      type: 'string'
+    }, 
+    COOKIE_HTTPONLY: {
+      type: 'boolean'
+    }, 
+    COOKIE_SECURE: {
+      type: 'boolean'
+    }, 
+    COOKIE_PATH: {
+      type: 'string'
+    },
+    SESSION_SIGNATURE: {
+      type: 'string'
+    } 
+  }
 }
+
+// const variables = {
+//     'DB_PASSWORD': z.string(), 
+//     'DB_USERNAME': z.string(), 
+//     'ACCESS_TOKEN_MINUTES': z.number(),  
+//     'LINK_EXPIRE_MINUTES': z.number(),  
+//     'REFRESH_TOKEN_DAYS': z.number(),  
+//     'SMTP_HOST': z.string(),
+//     'SMTP_PORT': z.number(),
+//     'SMTP_USE_TLS': z.boolean(),
+//     'SMTP_LOGIN': z.string(),
+//     'SMTP_PASSWORD': z.string(),
+//     'FROM_EMAIL': z.string(),  
+//     'SESSION_TOKEN_LENGTH': z.number(), 
+//     'JWT_SIGNATURE': z.string(),
+//     'JWT_SALT_LENGTH': z.number(), 
+//     'ROOT_DOMAIN': z.string(),
+//     'ROOT_PORT': z.number(), 
+//     'COOKIE_SIGNATURE' : z.string(), 
+//     'COOKIE_HTTPONLY': z.boolean(), 
+//     'COOKIE_SECURE': z.boolean(), 
+//     'COOKIE_PATH': z.string(),
+//     'SESSION_SIGNATURE': z.string(), 
+// } 
+
+
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -73,8 +149,21 @@ declare module 'fastify' {
   }
 
 const dotEnvPlugin = fp(async (server) => {
+
+    const options = {
+        confKey: 'env',
+        schema: schema,
+        dotenv: true,
+        data: process.env
+    }
+
     server.register(fastifyEnv, options)
-    await server.after()
+    .ready((err) => {
+      if (err) console.error(err)  
+    })
+    
+    //await server.after()
+    server.log.info('DotEnv Plugin Installed.')
 })
 
 export { dotEnvPlugin as DotEnvPlugin }

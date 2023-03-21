@@ -21,6 +21,12 @@ const mailPlugin = fp(async (server) => {
     }
     
     server.register(mail, transporter)
+    .ready((err) => {
+        if (err) console.error(err)  
+      })
+      
+    //await server.after()
+    server.log.info('Mail Plugin Installed.')
 })
 
 export { mailPlugin as MailPlugin }

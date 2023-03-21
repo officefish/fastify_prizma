@@ -45,6 +45,9 @@ const mercuriusPlugin = fp(async (server) => {
         },
         subscription: true
     }) 
+
+    //await server.after()
+    server.log.info('Mercurius Plugin Installed.')
 })
 
 export { mercuriusPlugin as MercuriusPlugin }

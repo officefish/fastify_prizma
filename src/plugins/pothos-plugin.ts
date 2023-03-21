@@ -61,6 +61,9 @@ declare module 'fastify' {
 const pothosPlugin = fp(async (server) => {
     const builder = await initBuilder(server.prisma)  
     server.decorate('schema', {builder})
+
+    //await server.after()
+    server.log.info('Pothos Plugin Installed.')
 })
 
 export { 

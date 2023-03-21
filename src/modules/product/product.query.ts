@@ -41,6 +41,9 @@ const buildQuery = fp(async (server) => {
 			ctx.prisma.product.findMany({...query})
 		}),
     }))
+
+    //await server.after()
+    server.log.info('Product gql api added.')
 })
 
 export { buildQuery as BuildProductQuery }
