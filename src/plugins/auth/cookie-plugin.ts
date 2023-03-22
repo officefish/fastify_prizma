@@ -17,6 +17,13 @@ declare module 'fastify' {
     interface FastifyInstance {
         cookieOptions: FastifyCookieOptions
     }
+
+    // interface FastifyReply extends SignerMethods {
+    //     /**
+    //      * Request cookies
+    //      */
+    //     cookies: Record<string, string>
+    //   }
 }
 
 const cookiePlugin = fp(async (server) => {
@@ -28,11 +35,11 @@ const cookiePlugin = fp(async (server) => {
         secure: server.env.COOKIE_SECURE 
     }
     server.decorate('cookieOptions', cookieOptions)
+    server.decorateReply('cookies', {})
 
     // maybe wrong because COOKIE_SIGNATURE should be 32 length string
-    const secretLength = server.env.SESSION_TOKEN_LENGTH
+    //const secretLength = server.env.SESSION_TOKEN_LENGTH
     const secret = server.env.COOKIE_SIGNATURE//await server.bcrypt.genSalt(256)
-    console.log(secret)
     
     server.register(fastifyCookie, {
         secret,

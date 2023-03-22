@@ -108,22 +108,26 @@ async function login(request:FastifyRequest<{
   const bcrypt = request.server.bcrypt
   try {
       const user = await userService.GetUniqueUser(prisma, {email})
-      if (user && user.verified) {
-        
-        const doubleCheck = await service.Compare(bcrypt, user.password, password)
-        if (!doubleCheck) {
-          throw new Error('User seems varified in system, but password is incorrect')
-        }
+      const samePassword = await service.Compare(bcrypt, password, user?.password || '')
+      if (user && samePassword) {
         // If the user has enabled two-factor authentication (2FA) ...
         // Don't login until a 2FA code is provided.
         if (user.secret) { 
           reply.send({userId: user.id, status: '2FA'})
-        
+
         } else {
           // 2FA is not enabled for this account,
           // so create a new session for this user.
-          await createSession(request, reply, user)
-          reply.send('logged in')
+          //await updateSession(request, reply, user)
+          //request.session.
+          const sessionToken = request.session.id || ''
+          await createTokenCookies({ userId: user.id, sessionToken, request, reply})
+
+          if (!user.verified) {
+            await sendVerifyEmail(request, reply, email)
+          }
+
+          reply.send({'access-token': reply.cookies['access-token']})
         }
     } else {
       reply.code(401).send('invalid email or password')
@@ -148,14 +152,16 @@ async function createTokenCookies(p: CreateTokensInput) {
     const accessToken = await service.Sign(jwt, {userId: p.userId, sessionToken: p.sessionToken})
     const accessExpires = service.NowPlusMinutes(accessTokenMinutes)
     const accessOptions = {...cookieOptions, expires:accessExpires}
-    service.CreateCookie( {reply:p.reply, 
+    service.CreateCookie( 
+      {reply:p.reply, 
       name:'access-token', value:accessToken, 
       options:accessOptions})
 
     const refreshToken = await service.Sign(jwt, {sessionToken:p.sessionToken})
     const refreshExpires = service.NowPlusDays(refreshTokenDays)
     const refreshOptions = {...cookieOptions, expires:refreshExpires}
-    service.CreateCookie({reply: p.reply,
+    service.CreateCookie(
+      {reply: p.reply,
       name: 'refresh-token', value: refreshToken,
       options: refreshOptions})
 
@@ -165,22 +171,55 @@ async function createTokenCookies(p: CreateTokensInput) {
   }
 }
 
-async function createSession(request:FastifyRequest, reply:FastifyReply, user:User) {
-  const tokenLength = request.server.env.SESSION_TOKEN_LENGTH
-  const bcrypt = request.server.bcrypt
-  const prisma = request.server.prisma
-  const sessionToken = await service.GenerateSalt(bcrypt, tokenLength) 
+async function sendVerifyEmail(request:FastifyRequest, reply:FastifyReply, email: string) {
+
+    const mailer = request.server.nodemailer
+
+    const domain = 'api.' + request.server.env.ROOT_DOMAIN
+    const link_expires = request.server.env.LINK_EXPIRE_MINUTES
+    const expires = service.NowPlusMinutes(link_expires).getTime().toString()
+    const encodedEmail = encodeURIComponent(email)
+
+    const crypto = request.server.minCrypto
+    const signature = request.server.env.JWT_SIGNATURE
+
+    const emailToken = await service.CreateJwt(crypto, {signature, email, expires}, ':')
+    const link =
+      `https://${domain}/verify/` + `${encodedEmail}/${expires}/${emailToken}`
+
+    // Send an email containing a link that can be clicked
+    // to verify the associated user.
+    const subject = request.server.env.SMTP_SUBJECT
+    const from = request.server.env.FROM_EMAIL
+    const html =
+      'Click the link below to verify your account.<br><br>' +
+      `<a href="${link}">VERIFY</a>`
+    //return sendEmail({to: email, subject, html})
+   
+    try {    
+      return await service.SendMail(mailer, {from, to: email, subject, html})   
+    } catch (e) {
+      reply.code(500).send(e)
+      //reply.code(500).send('Error with sending vefification email.')
+    }
+}
+
+async function updateSession(request:FastifyRequest, reply:FastifyReply, user:User) {
+  //const tokenLength = request.server.env.SESSION_TOKEN_LENGTH
+  //const bcrypt = request.server.bcrypt
+  //const prisma = request.server.prisma
+  
 
   try {    
-    const userAgent = request.headers['user-agent'] || ''
-    await service.CreateSession(prisma, {
-      userId: user.id,
-      token: sessionToken,
-      isMobile:service.IsMobile(userAgent),
-      userAgent
-    })
+    // const userAgent = request.headers['user-agent'] || ''
+    // await service.CreateSession(prisma, {
+    //   userId: user.id,
+    //   token: sessionToken,
+    //   isMobile:service.IsMobile(userAgent),
+    //   userAgent
+    // })
     // Create cookies containing access and refresh tokens.
-    await createTokenCookies({ userId: user.id, sessionToken, request, reply})
+    
   } catch (e) {
     throw new Error('session creation failed')
   }

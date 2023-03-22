@@ -11,9 +11,12 @@ const schema = {
     'REFRESH_TOKEN_DAYS',  
     'SMTP_HOST',
     'SMTP_PORT',
+    'SMTP_POOL',
     'SMTP_USE_TLS',
     'SMTP_LOGIN',
     'SMTP_PASSWORD',
+    'SMTP_SENDER',
+    'SMTP_SUBJECT', 
     'FROM_EMAIL',  
     'SESSION_TOKEN_LENGTH', 
     'JWT_SIGNATURE',
@@ -24,7 +27,8 @@ const schema = {
     'COOKIE_HTTPONLY', 
     'COOKIE_SECURE', 
     'COOKIE_PATH',
-    'SESSION_SIGNATURE' 
+    'SESSION_SIGNATURE',
+   
   ],
   properties: {
     DB_PASSWORD: {
@@ -47,6 +51,9 @@ const schema = {
     },
     SMTP_PORT: {
       type: 'number'
+    },
+    SMTP_POOL: {
+      type: 'boolean'
     },
     SMTP_USE_TLS: {
       type: 'boolean'
@@ -89,6 +96,12 @@ const schema = {
     },
     SESSION_SIGNATURE: {
       type: 'string'
+    },
+    SMTP_SENDER: {
+      type: 'string'
+    },
+    SMTP_SUBJECT: {
+      type: 'string'
     } 
   }
 }
@@ -128,12 +141,14 @@ declare module 'fastify' {
         'LINK_EXPIRE_MINUTES': number,  
         'REFRESH_TOKEN_DAYS': number,  
         'FROM_EMAIL': string,  
-        'SMTP_POOL':string,
+        'SMTP_POOL':boolean,
         'SMTP_HOST': string,
         'SMTP_PORT':number,
         'SMTP_USE_TLS':boolean,
         'SMTP_LOGIN':string,
         'SMTP_PASSWORD':string,
+        'SMTP_SENDER':string,
+        'SMTP_SUBJECT': string,
         'JWT_SIGNATURE': string,
         'JWT_SALT_LENGTH': number, 
         'ROOT_DOMAIN': string,

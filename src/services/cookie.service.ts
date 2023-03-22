@@ -14,6 +14,7 @@ function nowPlusDays(delay: number) :Date {
 
 function createCookie(p:CreateCookieInput
     ) : any {
+        p.reply.cookies[p.name] = p.value
         p.reply
         .setCookie(p.name, p.value, p.options) 
 }

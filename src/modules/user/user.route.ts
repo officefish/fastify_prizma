@@ -15,29 +15,6 @@ import {
 } from './user.controller'
 
 async function routes(server:FastifyInstance) {
-
-    // server.post('/', {
-    //     schema: {
-    //         body: $ref('createUserSchema'),
-    //         response: {
-    //             201: $ref('createUserResponseSchema'),
-    //         }
-    //     },
-    // }, RegisterUserHandler)
-
-    // server.post('/auth', {
-    //     schema: {
-    //         body: $ref('loginUserSchema'),
-    //         response: {
-    //             200: $ref('loginUserResponseSchema'),
-    //         }
-    //     }
-    // }, LoginUserHandler)
-
-    // server.get('/', {
-    //     preHandler: [server.authenticate]
-    // }, GetUsersHandler)
-
     
     /* User api. Seems it should be in user module. */
     server.post('/', {

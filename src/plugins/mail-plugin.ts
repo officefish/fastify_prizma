@@ -12,15 +12,26 @@ const mailPlugin = fp(async (server) => {
         pass: server.env.SMTP_PASSWORD
     }
 
-    const transporter = {
+    const transport = {
         pool: pool,
         host: host,
         port: port,
         secure: secure, // use TLS
         auth: auth
     }
+
+    const sender = server.env.SMTP_SENDER 
+    const fromEmail = server.env.FROM_EMAIL
+    const subject = server.env.SMTP_SUBJECT
+
+    const defaults = {
+        // set the default sender email address to jane.doe@example.tld
+        from: `${sender} <${fromEmail}>`,
+        // set the default email subject to 'default example'
+        subject: subject,
+    }
     
-    server.register(mail, transporter)
+    server.register(mail, {...defaults, ...transport})
     .ready((err) => {
         if (err) console.error(err)  
       })
