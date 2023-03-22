@@ -100,7 +100,10 @@ async function createUser(request:FastifyRequest<{
       // Send email to user containing a link
       // they can click to verify their account.
       // Some operations could require the user to be verified.
-      await sendVerifyEmail(request, email)
+      //await sendVerifyEmail(request, email)
+
+      //console.log(reply.cookies)
+
 
     } catch (e) {
       console.error('createUser error:', e)
@@ -147,31 +150,7 @@ async function changePassword(request:FastifyRequest<{
 
 }
 
-async function sendVerifyEmail(request:FastifyRequest, email: string) {
 
-    const mailer = request.server.nodemailer
-  
-    const domain = 'api.' + request.server.env.ROOT_DOMAIN
-    const link_expires = request.server.env.LINK_EXPIRE_MINUTES
-    const expires = service.NowPlusMinutes(link_expires).getTime().toString()
-    const encodedEmail = encodeURIComponent(email)
-  
-    const crypto = request.server.minCrypto
-    const signature = request.server.env.JWT_SIGNATURE
-    
-    const emailToken = await service.CreateJwt(crypto, {signature, email, expires}, ':')
-    const link =
-      `https://${domain}/verify/` + `${encodedEmail}/${expires}/${emailToken}`
-  
-    // Send an email containing a link that can be clicked
-    // to verify the associated user.
-    const subject = 'Verify your account'
-    const html =
-      'Click the link below to verify your account.<br><br>' +
-      `<a href="${link}">VERIFY</a>`
-    //return sendEmail({to: email, subject, html})
-    return await service.SendMail(mailer, {to: email, subject, html})
-}
 
 async function deleteCurrentUser(request:FastifyRequest, reply:FastifyReply) {
 
