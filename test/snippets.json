@@ -1,0 +1,50 @@
+{
+    "describeTestApp": {
+      "prefix": ["vdta", "descibe-vitetest-app"],
+      "body": 
+        [
+            "\"use strict\"", 
+            "import { describe, test, beforeAll, afterAll, expect, } from 'vitest'", 
+            "import supertest from 'supertest'",
+            "import {buildApp, AppOptions} from '../src/app'",
+            "\nconst options: AppOptions = { logger: false, }",
+            "const contentType = 'application/json; charset=utf-8'",
+            "\ndescribe('${0}', () => {",
+            "\n\tlet app",
+            "\tbeforeAll(async () => {",
+            "\t\tapp = await buildApp(options)",
+            "\t})",
+            "\n\ttest('${1}', async () => {",
+            "\t\tconst response = await app.inject({",
+            "\t\t\tmethod: '${2}',",
+            "\t\t\turl: '${3}',",
+            "\t\t})",
+            "\n\t\texpect(response.statusCode).toBe(200)",
+            "\t\texpect(response.headers['content-type']).toBe(contentType)",
+            "\t\texpect(JSON.parse(response.payload)).instanceOf(Object)",
+            "\t\texpect(JSON.parse(response.payload)).toStrictEqual(${4})",
+            "\t})",
+            "\n\tafterAll(async () => {",
+            "\t\tawait app.close()",
+            "\t})",
+            "\n})"
+        ],
+      "description": "Vitetest with imports and describe test header"
+    }, 
+    "testApp": {
+        "prefix": ["vta", "vitetest-app"],
+        "body": [
+            "\n\ttest('${0}', async () => {",
+            "\t\tconst response = await app.inject({",
+            "\t\t\tmethod: '${1}',",
+            "\t\t\turl: '${2}',",
+            "\t\t})",
+            "\n\t\texpect(response.statusCode).toBe(200)",
+            "\t\texpect(response.headers['content-type']).toBe(contentType)",
+            "\t\texpect(JSON.parse(response.payload)).instanceOf(Object)",
+            "\t\texpect(JSON.parse(response.payload)).toStrictEqual(${3})",
+            "\t})"
+        ],
+        "description": "Vitetest with imports and describe test header"
+    }
+}

@@ -52,7 +52,9 @@ async function buildApp(options: AppOptions = {}) {
     fastify.register(ProductRoutes, { prefix: 'api/products' })
     fastify.register(AuthRoutes, {prefix: 'api/auth'})
 
-    
+    fastify.get('/healthcheck', (request) => {
+      return { status: 'ok' }
+    })
 
     return fastify
 }
@@ -64,9 +66,7 @@ async function startApp(server:FastifyInstance) {
       console.log(server.printRoutes())
     })
 
-    server.get('/healthcheck', (request) => {
-        return { status: 'ok' }
-    })
+    
 
     server.get('/', (request, reply) => {
       console.log(request.cookies)

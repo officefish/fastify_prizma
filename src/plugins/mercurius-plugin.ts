@@ -27,10 +27,11 @@ const mercuriusPlugin = fp(async (server) => {
     const schema = builder.toSchema({})
 
     /* Not neccesary but let it be */
-    const schemaAsString = printSchema(lexicographicSortSchema(schema))
-    if (process.env.NODE_ENV !== 'production') {
-        fs.writeFileSync(path.join(process.cwd(), './schema.gql'), schemaAsString)
-    }
+    // const schemaAsString = printSchema(lexicographicSortSchema(schema))
+    
+    // if (process.env.NODE_ENV !== 'production') {
+    //     fs.writeFileSync(path.join(process.cwd(), './schema.gql'), schemaAsString)
+    // }
 
     server.register(mercurius, {
         schema,

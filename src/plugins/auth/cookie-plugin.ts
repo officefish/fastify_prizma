@@ -34,8 +34,11 @@ const cookiePlugin = fp(async (server) => {
         path: server.env.COOKIE_PATH,
         secure: server.env.COOKIE_SECURE 
     }
+
     server.decorate('cookieOptions', cookieOptions)
-    server.decorateReply('cookies', {})
+
+    const cookieContext = {}
+    server.decorateReply('cookies', { getter: () => cookieContext })
 
     // maybe wrong because COOKIE_SIGNATURE should be 32 length string
     //const secretLength = server.env.SESSION_TOKEN_LENGTH
