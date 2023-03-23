@@ -11,6 +11,7 @@
 // const {compare, genSalt, hash} = bcrypt;
 // const {ObjectID} = mongo;
 
+
 import { FastifyInstance } from "fastify"
 import { GetProtectedDataHandler,
   GetUnprotectedDataHandler,
@@ -20,6 +21,8 @@ import { GetProtectedDataHandler,
   LoginHandler,
   LogoutHandler
 } from "./auth.controller"
+
+import { $ref } from "./auth.schema"
 
 async function routes(server:FastifyInstance) {
 
@@ -67,6 +70,7 @@ async function routes(server:FastifyInstance) {
 
     server.get('/verify/:email/:expires/:token', {
       schema: {
+        params: $ref('verifyUserSchema'),
         description: 'User token verification.',
         tags: ['auth'],
       }

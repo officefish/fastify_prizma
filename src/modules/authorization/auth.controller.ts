@@ -3,6 +3,7 @@ import { FastifyRequest } from "fastify/types/request"
 
 import { 
   LoginInput,
+  VerifyUserInput,
   CreateTokensInput,
   SendVerifyEmailInput
 } from "./auth.schema"
@@ -70,7 +71,7 @@ async function authenticate(request:FastifyRequest, reply:FastifyReply) {
 
         return user
       } else {
-        throw new Error('no valid session found');
+        throw new Error('no valid session found')
       }
     } else {
       //throw new Error('no access token or refresh token found');
@@ -84,11 +85,41 @@ async function authenticate(request:FastifyRequest, reply:FastifyReply) {
 }
 
 
+//http://localhost:8001/api/auth/verify/
+//futuresimple%40yandex.ru/
+//1679569975353/
+//88f0cd277e99b19203599c4116ee4583ed3a8b362b4fdb9229056db711feaaec
 
+async function verifyUser(request:FastifyRequest<{
+  Params: VerifyUserInput
+}>, reply:FastifyReply) {
+    const {expires, token} = request.params
+    const email = decodeURIComponent(request.params.email)
+    // Determine if the token matches the
+    // specified email and expires timestamp.
+    const crypto = request.server.minCrypto
+    const signature = request.server.env.JWT_SIGNATURE
 
-
-async function verifyUser(request:FastifyRequest, reply:FastifyReply) {
-
+    const emailToken = await service.CreateJwt(crypto, {signature, email, expires}, ':')
+    const matches = token === emailToken
+  
+    if (!matches || Date.now() > +expires) {
+      reply.code(400).send('verify link expired')
+      return
+    }
+  
+    try {
+      const prisma = request.server.prisma
+      await userService.UpdateUser(prisma, {email, verified:true})
+  
+      const domain = request.server.env.ROOT_DOMAIN
+      const port = request.server.env.ROOT_PORT
+      // Navigate to teh login page.
+      reply.redirect('http://' + 'localhost' + ':' + port + '/')
+    } catch (e) {
+      console.error('verifyUser error:', e)
+      reply.code(500).send('error verifying user: ' + e)
+    }
 }
 
 async function register2FA(request:FastifyRequest, reply:FastifyReply) {
@@ -127,7 +158,11 @@ async function login(request:FastifyRequest<{
             await sendVerifyEmail(request, reply, email)
           }
 
-          reply.send({'access-token': reply.cookies['access-token']})
+          const replyPayload = {
+            'access-token': reply.cookies['access-token'],
+            'verified': user.verified
+          }
+          reply.send(replyPayload)
         }
     } else {
       reply.code(401).send('invalid email or password')
@@ -175,17 +210,20 @@ async function sendVerifyEmail(request:FastifyRequest, reply:FastifyReply, email
 
     const mailer = request.server.nodemailer
 
-    const domain = 'api.' + request.server.env.ROOT_DOMAIN
+    //const domain = 'api.' + request.server.env.ROOT_DOMAIN
+    const domain = 'localhost:8001/api/auth'
     const link_expires = request.server.env.LINK_EXPIRE_MINUTES
     const expires = service.NowPlusMinutes(link_expires).getTime().toString()
-    const encodedEmail = encodeURIComponent(email)
+   
 
     const crypto = request.server.minCrypto
     const signature = request.server.env.JWT_SIGNATURE
 
     const emailToken = await service.CreateJwt(crypto, {signature, email, expires}, ':')
+
+    const encodedEmail = encodeURIComponent(email)
     const link =
-      `https://${domain}/verify/` + `${encodedEmail}/${expires}/${emailToken}`
+      `http://${domain}/verify/` + `${encodedEmail}/${expires}/${emailToken}`
 
     // Send an email containing a link that can be clicked
     // to verify the associated user.

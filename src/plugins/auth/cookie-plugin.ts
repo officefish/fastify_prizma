@@ -52,6 +52,7 @@ const cookiePlugin = fp(async (server) => {
     .ready((err) => {
         if (err) console.error(err)  
     })
+
     //await server.after()
     server.log.info('Cookie Plugin Installed.')
 })

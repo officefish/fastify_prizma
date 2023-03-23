@@ -14,12 +14,17 @@ import { BuildPostQuery } from './modules/post/post.query'
 import { BuildUserQuery } from './modules/user/user.query'
 import { BuildProductQuery } from './modules/product/product.query'
 
+import { DeleteAllUsers } from './modules/user/user.service'
+
 export type AppOptions = Partial<FastifyServerOptions>
 
 async function buildApp(options: AppOptions = {}) {
     const fastify = Fastify(options)
 
-    for (const schema of [...AuthSchemas, ...UserSchemas, ...ProductSchemas]) {
+    for (const schema of [
+      ...AuthSchemas,
+      ...UserSchemas, 
+      ...ProductSchemas]) {
         fastify.addSchema(schema)
     }
 
@@ -29,6 +34,7 @@ async function buildApp(options: AppOptions = {}) {
     fastify.register(plugins.MinCryptoPlugin)
     fastify.register(plugins.MailPlugin)
     
+    fastify.register(plugins.AuthPlugin)
     fastify.register(plugins.JwtPlugin)
     fastify.register(plugins.CookiePlugin)
     /* Session plugin need cookie and minCrypto plugins */
@@ -56,6 +62,16 @@ async function buildApp(options: AppOptions = {}) {
       return { status: 'ok' }
     })
 
+    fastify.get('/', (req, reply) => {
+      reply.code(200).send({status: 'ok'})
+    })
+
+    await fastify.after()
+    await DeleteAllUsers(fastify.prisma)
+
+    //console.log(process.env)
+
+
     return fastify
 }
 
@@ -64,15 +80,6 @@ async function startApp(server:FastifyInstance) {
     server.ready(err => {
       if (err) server.log.error(err)
       console.log(server.printRoutes())
-    })
-
-    
-
-    server.get('/', (request, reply) => {
-      console.log(request.cookies)
-      //console.log(request.session)
-      reply
-        .send(request.cookies.sessionId)
     })
 
     try {

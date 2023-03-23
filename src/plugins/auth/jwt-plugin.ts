@@ -1,15 +1,10 @@
 
 import fp from 'fastify-plugin'
 import jwt from '@fastify/jwt'
-import { AuthenticateHandler, InitializeHandler } from './jwt.controller'
 
 declare module 'fastify' {
     interface FastifyInstance {
-        authenticate: any,
-        initialize: any,
-        user: {
-            id: string
-        }
+        jwtVerify: any,
     }
 }
 
@@ -30,22 +25,16 @@ interface JwtExpPayload {
     exp: number
 }
 
-
 const jwtPlugin = fp(async (server) => {
-    server.decorate('initialize', InitializeHandler)
-    server.decorate('authenticate', AuthenticateHandler)
-    server.decorate('user', {})
+    
+    const userContext = {}
+    server.decorate('user', { getter: () => userContext })
+    
     server.register(jwt, { secret: server.env.JWT_SIGNATURE })
     .ready((err) => {
         if (err) console.error(err)  
     })
     
-    server.addHook('onRoute', (routeOptions) => {
-        if (routeOptions.url === '/graphql') {
-          routeOptions.preHandler = [server.initialize]
-        }
-    })
-   
     //await server.after()
     server.log.info('Jwt Plugin Installed.')
 })

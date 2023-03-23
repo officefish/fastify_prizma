@@ -28,7 +28,14 @@ const loginUserResponseSchema = z.object({
     accessToken: z.string(),
 })
 
+const verifyUserSchema = z.object({
+    ...email,
+    expires: z.string(),
+    token: z.string()
+})
+
 type LoginInput = z.infer<typeof loginUserSchema>
+type VerifyUserInput = z.infer<typeof verifyUserSchema>
 
 type CreateTokensInput = {
     userId: string, 
@@ -52,6 +59,7 @@ type SendVerifyEmailInput = {
 
 export { 
     LoginInput,
+    VerifyUserInput,
     CreateCookieInput,
     CreateTokensInput,
     SendVerifyEmailInput
@@ -59,6 +67,7 @@ export {
 
 export const {schemas:AuthSchemas, $ref} = buildJsonSchemas({
     loginUserSchema,
+    verifyUserSchema,
     loginUserResponseSchema,
 }, {$id: 'AuthSchema'})
 

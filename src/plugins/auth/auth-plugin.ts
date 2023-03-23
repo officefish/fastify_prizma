@@ -1,6 +1,16 @@
 import fp from 'fastify-plugin'
 import { InitializeHandler, AuthenticateHandler } from '../../modules/authorization/auth.controller'
 
+declare module 'fastify' {
+    interface FastifyInstance {
+        initialize: any,
+        authenticate: any,
+        user: {
+            id: string
+        }
+    }
+}
+
 const authPlugin = fp(async (server) => {
     server.decorate('initialize', InitializeHandler)
     server.decorate('authenticate', AuthenticateHandler)

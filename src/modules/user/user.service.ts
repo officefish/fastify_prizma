@@ -17,12 +17,24 @@ async function createUser(prisma:PrismaClient, data:Prisma.UserCreateInput) {
     return user
 }
 
+async function updateUser(prisma:PrismaClient, data:Prisma.UserUpdateInput) {
+    return await prisma.user.update({where: {
+        email: data.email as string
+    }, data})
+}
+
 async function updatePassword(prisma:PrismaClient, userId: string, newPassword: string) {
 
 }
 
 async function updatePasswordWithEmail(prisma:PrismaClient, email: string, newPassword: string) {
 
+}
+
+async function deleteAllUsers(prisma:PrismaClient) {
+    await prisma.session.deleteMany({})
+    await prisma.product.deleteMany({}) 
+    await prisma.user.deleteMany({})
 }
 
 
@@ -48,23 +60,22 @@ async function findUsers(prisma: PrismaClient) {
 export { 
     getUniqueUser as GetUniqueUser, 
     createUser as CreateUser, 
+    updateUser as UpdateUser,
     updatePassword as UpdatePassword,
-    updatePasswordWithEmail as UpdatePasswordWithEmail
+    updatePasswordWithEmail as UpdatePasswordWithEmail,
+    verifyPassword as VerifyPassword,
+    deleteAllUsers as DeleteAllUsers
  }
 
  export default {
     GetUniqueUser: getUniqueUser,
     CreateUser: createUser,
+    UpdateUser: updateUser,
+    VerifyPassword: verifyPassword,
     UpdatePassword: updatePassword,
     UpdatePasswordWithEmail: updatePasswordWithEmail, 
-    getUniqueUserPassword: getUniqueUserPassword
+    GetUniqueUserPassword: getUniqueUserPassword,
+    DeleteAllUsers: deleteAllUsers
  }
 
-
-export { 
-    createUser as CreateUserService,
-    findUserByEmail as FindUserByEmailService,
-    verifyPassword as VerifyPasswordService,
-    findUsers as FindUsersService 
-}
 

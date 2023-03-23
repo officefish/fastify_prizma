@@ -132,7 +132,7 @@ async function changePassword(request:FastifyRequest<{
       // This verifies that the user is currently authenticated
       // and gets their current hashed password.
         const user = request.user as UserPayload//await getUser(request, reply)
-        const password = await userService.getUniqueUserPassword(prisma, {id: user.id})
+        const password = await userService.GetUniqueUserPassword(prisma, {id: user.id})
         const matches = await service.Compare(bcrypt, oldPassword, password || '')
         
         if (matches) {

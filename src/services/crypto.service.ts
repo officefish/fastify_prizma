@@ -23,7 +23,7 @@ async function sign(jwt:JWT, payload: SignPayloadType, options?: Partial<SignOpt
     return await jwt.sign(payload, options)
 }
 
-async function createJwt(crypto:MinCrypto, options:JwtOptions, separator: string) {
+async function createJwt(crypto:MinCrypto, options:JwtOptions, separator: string = '') {
     return await crypto.createJwt(options, separator)
 }
 

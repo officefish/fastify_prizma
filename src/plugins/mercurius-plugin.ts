@@ -17,21 +17,12 @@ interface Context {
 
 const mercuriusPlugin = fp(async (server) => {
 
-    //await server.after()
-
     const builder = server.schema.builder
     builder.queryType({
         fields: t => ({})
     })
 
     const schema = builder.toSchema({})
-
-    /* Not neccesary but let it be */
-    // const schemaAsString = printSchema(lexicographicSortSchema(schema))
-    
-    // if (process.env.NODE_ENV !== 'production') {
-    //     fs.writeFileSync(path.join(process.cwd(), './schema.gql'), schemaAsString)
-    // }
 
     server.register(mercurius, {
         schema,
@@ -46,6 +37,12 @@ const mercuriusPlugin = fp(async (server) => {
         },
         subscription: true
     }) 
+
+    server.addHook('onRoute', (routeOptions) => {
+        if (routeOptions.url === '/graphql') {
+          routeOptions.preHandler = [server.initialize]
+        }
+    })
 
     //await server.after()
     server.log.info('Mercurius Plugin Installed.')
