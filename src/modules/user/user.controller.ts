@@ -97,14 +97,6 @@ async function createUser(request:FastifyRequest<{
       // After successfully creating a new user, automatically log in.
       await authController.login(request, reply)
   
-      // Send email to user containing a link
-      // they can click to verify their account.
-      // Some operations could require the user to be verified.
-      //await sendVerifyEmail(request, email)
-
-      //console.log(reply.cookies)
-
-
     } catch (e) {
       console.error('createUser error:', e)
       reply.code(500).send(e)

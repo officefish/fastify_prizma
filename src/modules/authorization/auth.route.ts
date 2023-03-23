@@ -19,7 +19,8 @@ import { GetProtectedDataHandler,
   Register2FAHandler,
   Login2FAHandler,
   LoginHandler,
-  LogoutHandler
+  LogoutHandler,
+  AuthenticateHandler
 } from "./auth.controller"
 
 import { $ref } from "./auth.schema"
@@ -54,8 +55,17 @@ async function routes(server:FastifyInstance) {
     */
 
     /* Auth api */
+    server.get('/', {
+      preHandler:[server.authenticate],
+      schema: {
+        description: 'User Authenticate',
+        tags: ['auth'],
+      }
+    }, (req, reply) => { reply.code(200).send({status:'ok'}) })
+
     server.post('/login', {
       schema: {
+        body: $ref('loginUserSchema'),
         description: 'User login',
         tags: ['auth'],
       }

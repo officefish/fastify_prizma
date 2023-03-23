@@ -69,9 +69,6 @@ async function buildApp(options: AppOptions = {}) {
     await fastify.after()
     await DeleteAllUsers(fastify.prisma)
 
-    //console.log(process.env)
-
-
     return fastify
 }
 
@@ -79,7 +76,8 @@ async function startApp(server:FastifyInstance) {
     
     server.ready(err => {
       if (err) server.log.error(err)
-      console.log(server.printRoutes())
+      //console.log(server.printRoutes())
+      console.log(process.env)
     })
 
     try {

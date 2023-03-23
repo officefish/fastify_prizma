@@ -7,11 +7,7 @@
   "author": "techies",
   "license": "MIT",
   "scripts": {
-    "to:prod": "set NODE_ENV=production& ",
-    "to:dev": "cross-env NODE_ENV=development",
-    "nodemon": "concurrently \"nodemon\" \"npm -s run to:prod\" ",
     "dev": "concurrently --kill-others --prefix \"[{name}]\" --names \"TypeScript,App\" --prefix-colors \"yellow.bold,cyan.bold\" \"tsc -w\" \"nodemon\"",
-    "prod-dev": "set NODE_ENV=production && set TS_NODE_BASEURL=./dist && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\"  \"tsc -w\" \"nodemon\"",
     "dev-build": "tsnd --respawn --transpile-only --exit-child index.ts",
     "dev:pretty": "npm run dev | pino-pretty",
     "start": "node dist/index",
@@ -23,7 +19,7 @@
     "db:push": "prisma db push --preview-feature",
     "format": "npx prettier --write './**/*.{ts,md}'",
     "tap-test": "tap --reporter=list --watch",
-    "test": "vitest",
+    "test": "vitest --no-threads",
     "test-ui": "vitest --ui",
     "typecheck": "vitest typecheck",
     "coverage": "vitest run --coverage"

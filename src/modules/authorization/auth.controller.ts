@@ -43,52 +43,29 @@ async function initialize (request:FastifyRequest ) {
 
 async function authenticate(request:FastifyRequest, reply:FastifyReply) {
 
-  const jwt = request.server.jwt
-  const prisma = request.server.prisma
+    const jwt = request.server.jwt
+    try {
+      const accessToken = request.cookies['access-token'] || ""
+      await service.Verify(jwt, accessToken)
+    
+    } catch (e) {
+      try {
+        const refreshToken = request.cookies['refresh-token'] || ""
+        await service.Verify(jwt, refreshToken)
+        
+        const sessionToken = request.session.id || ''
+        const userId = request.session.user_id
+        await createTokenCookies({ userId, sessionToken, request, reply})
 
-  const accessToken = request.cookies['access-token'] as string
-  if (accessToken) {
-    const decodedPayload = await service.Verify(jwt, accessToken) 
-    const user = await userService.GetUniqueUser(prisma, {id:decodedPayload.id})
-    return user
+        // maybe need to send verify email one more time?
 
-  } else {
-    const refreshToken = request.cookies['refresh-token']
-    if (refreshToken) {
-      // This should throws if refreshToken is not valid. But we should check it
-      const decodedRefreshToken = await service.Verify(jwt, refreshToken)
-      
-      const session = await service.GetUniqueSession(prisma, {token:decodedRefreshToken.id})
-      if (session && session.valid) {
-        const user = await userService.GetUniqueUser(prisma, {id:session.userId})
-        if (!user) throw new Error('user not found')
-
-        // Create new access and refresh tokens for this session.
-        await createTokenCookies({
-          userId: session.userId, 
-          sessionToken: session.token, 
-          request, reply})
-
-        return user
-      } else {
-        throw new Error('no valid session found')
+      } catch (e) {
+        //console.error(e)
+        reply.code(400).send({error: { message:'Access token required'}})
       }
-    } else {
-      //throw new Error('no access token or refresh token found');
-      // try to get token from bearer
-      //const jwtPayload = jwt.decode(
-      //  req.header('authorization')!
-      //) as JwtExpPayload
-    }
   }
 
 }
-
-
-//http://localhost:8001/api/auth/verify/
-//futuresimple%40yandex.ru/
-//1679569975353/
-//88f0cd277e99b19203599c4116ee4583ed3a8b362b4fdb9229056db711feaaec
 
 async function verifyUser(request:FastifyRequest<{
   Params: VerifyUserInput
@@ -104,18 +81,16 @@ async function verifyUser(request:FastifyRequest<{
     const matches = token === emailToken
   
     if (!matches || Date.now() > +expires) {
-      reply.code(400).send('verify link expired')
+      reply.code(400).send({error: { message:'verify link expired'}})
       return
     }
   
     try {
+
       const prisma = request.server.prisma
-      await userService.UpdateUser(prisma, {email, verified:true})
-  
-      const domain = request.server.env.ROOT_DOMAIN
-      const port = request.server.env.ROOT_PORT
-      // Navigate to teh login page.
-      reply.redirect('http://' + 'localhost' + ':' + port + '/')
+      const user = await userService.UpdateUser(prisma, {email, verified:true})
+      reply.code(200).send({verified: user.verified})
+
     } catch (e) {
       console.error('verifyUser error:', e)
       reply.code(500).send('error verifying user: ' + e)
@@ -150,10 +125,12 @@ async function login(request:FastifyRequest<{
           // 2FA is not enabled for this account,
           // so create a new session for this user.
           //await updateSession(request, reply, user)
-          //request.session.
-          const sessionToken = request.session.id || ''
-          await createTokenCookies({ userId: user.id, sessionToken, request, reply})
-
+          if (request.session) {
+            const sessionToken = request.session.id || ''
+            request.session.user_id = user.id
+            await createTokenCookies({ userId: user.id, sessionToken, request, reply})
+          }
+          
           if (!user.verified) {
             await sendVerifyEmail(request, reply, email)
           }
