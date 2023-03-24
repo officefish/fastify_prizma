@@ -51,6 +51,12 @@ type CreateCookieInput = {
     options:CookieOptions,
 }
 
+type ClearCookieInput = {
+    reply:FastifyReply,
+    name:string,
+    options:CookieOptions
+}
+
 type SendVerifyEmailInput = {
     email: string,
     domain: string,
@@ -61,6 +67,7 @@ export {
     LoginInput,
     VerifyUserInput,
     CreateCookieInput,
+    ClearCookieInput,
     CreateTokensInput,
     SendVerifyEmailInput
 }

@@ -1,5 +1,7 @@
 import { FastifyReply } from "fastify/types/reply"
 import { FastifyRequest } from "fastify/types/request"
+import { FastifyError } from "fastify"
+import { HookHandlerDoneFunction } from "fastify"
 
 import { 
   LoginInput,
@@ -40,7 +42,6 @@ async function initialize (request:FastifyRequest ) {
   request.server.user.id =  identity
 }
 
-
 async function authenticate(request:FastifyRequest, reply:FastifyReply) {
 
     const jwt = request.server.jwt
@@ -52,19 +53,16 @@ async function authenticate(request:FastifyRequest, reply:FastifyReply) {
       try {
         const refreshToken = request.cookies['refresh-token'] || ""
         await service.Verify(jwt, refreshToken)
-        
-        const sessionToken = request.session.id || ''
-        const userId = request.session.user_id
+
+        const {sessionToken, userId} =  await service.RegenerateSession(request, reply)
         await createTokenCookies({ userId, sessionToken, request, reply})
 
         // maybe need to send verify email one more time?
-
       } catch (e) {
         //console.error(e)
         reply.code(400).send({error: { message:'Access token required'}})
       }
   }
-
 }
 
 async function verifyUser(request:FastifyRequest<{
@@ -125,11 +123,8 @@ async function login(request:FastifyRequest<{
           // 2FA is not enabled for this account,
           // so create a new session for this user.
           //await updateSession(request, reply, user)
-          if (request.session) {
-            const sessionToken = request.session.id || ''
-            request.session.user_id = user.id
-            await createTokenCookies({ userId: user.id, sessionToken, request, reply})
-          }
+          const {sessionToken, userId} = await service.RegenerateSession(request, reply)
+          await createTokenCookies({ userId, sessionToken, request, reply})
           
           if (!user.verified) {
             await sendVerifyEmail(request, reply, email)
@@ -151,7 +146,19 @@ async function login(request:FastifyRequest<{
 }
 
 async function logout(request:FastifyRequest, reply:FastifyReply) {
-
+  try {
+        
+        const {options} = await service.RegenerateSession(request, reply)
+      
+        // Clear the access and refresh token cookies for this session.
+        service.ClearCookie({reply, name:'access-token', options})
+        service.ClearCookie({reply, name:'refresh-token', options})
+        reply.code(200).send({status:'logged out'})
+    
+      } catch (e) {
+        console.error('logout error:', e)
+        reply.code(400).send(e)
+    }
 }
 
 async function createTokenCookies(p: CreateTokensInput) {

@@ -1,4 +1,4 @@
-import { CreateCookieInput } from "../modules/authorization/auth.schema"
+import { CreateCookieInput, ClearCookieInput } from "../modules/authorization/auth.schema"
 
 function nowPlusMinutes(delay: number): Date {
     let expires = new Date()
@@ -19,8 +19,15 @@ function createCookie(p:CreateCookieInput
         .setCookie(p.name, p.value, p.options) 
 }
 
+function clearCookie(p:ClearCookieInput) {
+    p.reply.cookies[p.name] = undefined
+    p.reply
+    .clearCookie(p.name, p.options) 
+}
+
 export { 
     createCookie as CreateCookie,
+    clearCookie as ClearCookie,
     nowPlusDays as NowPlusDays,
     nowPlusMinutes as NowPlusMinutes
 }

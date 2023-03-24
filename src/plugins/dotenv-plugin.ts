@@ -18,7 +18,6 @@ const schema = {
     'SMTP_SENDER',
     'SMTP_SUBJECT', 
     'FROM_EMAIL',  
-    'SESSION_TOKEN_LENGTH', 
     'JWT_SIGNATURE',
     'JWT_SALT_LENGTH', 
     'ROOT_DOMAIN',
@@ -28,6 +27,8 @@ const schema = {
     'COOKIE_SECURE', 
     'COOKIE_PATH',
     'SESSION_SIGNATURE',
+    'SESSION_TOKEN_LENGTH', 
+    'SESSION_MAX_AGE'
    
   ],
   properties: {
@@ -67,9 +68,6 @@ const schema = {
     FROM_EMAIL: {
       type: 'string'
     },   
-    SESSION_TOKEN_LENGTH: {
-      type: 'number'
-    }, 
     JWT_SIGNATURE: {
       type: 'string'
     },
@@ -97,6 +95,12 @@ const schema = {
     SESSION_SIGNATURE: {
       type: 'string'
     },
+    SESSION_TOKEN_LENGTH: {
+      type: 'number'
+    }, 
+    SESSION_MAX_AGE: {
+      type: 'number'
+    }, 
     SMTP_SENDER: {
       type: 'string'
     },
@@ -159,6 +163,7 @@ declare module 'fastify' {
         'COOKIE_PATH': string, 
         'SESSION_SIGNATURE': string, 
         'SESSION_TOKEN_LENGTH': number, 
+        'SESSION_MAX_AGE': number
       }
     }
   }

@@ -119,7 +119,7 @@ describe('Auth API', () => {
 
     it(`GET /api/auth/ with no token should send error message`, async () => {
         const response = await app.inject()
-            .get(`${authRoot}/`)
+            .get(`/api/auth/`)
 
         expect(response.statusCode).toBe(400)
         expect(response.headers['content-type']).toBe(contentType)
@@ -129,7 +129,7 @@ describe('Auth API', () => {
 
     it(`GET /api/auth/ with refresh token should authenticate user and send new tokens in cookies`, async () => {
         const response = await app.inject()
-            .get(`${authRoot}/`)
+            .get(`/api/auth/`)
             .cookies({'refresh-token':refreshToken})
 
         expect(response.statusCode).toBe(200)
@@ -142,6 +142,22 @@ describe('Auth API', () => {
         expect(newAccessToken.length > 0).toBeTruthy()
         expect(newRefreshToken.length > 0).toBeTruthy()
     })
+
+    it(`GET /api/auth/logout should clear tokens cookies`, async () => {
+        const response = await app.inject()
+            .get(`/api/auth/logout`)
+
+        expect(response.statusCode).toBe(200)
+        expect(response.headers['content-type']).toBe(contentType)
+        expect(response.json()).instanceOf(Object)
+
+        const newAccessToken = response.cookies.find((cokkie) => cokkie.name === 'access-token')?.value || ''
+        const newRefreshToken = response.cookies.find((cokkie) => cokkie.name === 'refresh-token')?.value || ''
+        
+        expect(newAccessToken.length > 0).toBeFalsy()
+        expect(newRefreshToken.length > 0).toBeFalsy()
+    })
+
 
 
 })
