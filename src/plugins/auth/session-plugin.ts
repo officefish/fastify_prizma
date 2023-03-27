@@ -1,11 +1,11 @@
 import fp from 'fastify-plugin'
 import { fastifySession } from '@fastify/session'
-import fastifyCookie from '@fastify/cookie'
 
+import { Role } from '@prisma/client'
 declare module "fastify" {
     interface Session {
-        user_id: string
-        other_key: string
+        userId?: string 
+        userRole?: Role
         id?: string
     }
 }
@@ -33,14 +33,12 @@ const sessionPlugin = fp(async (server) => {
         // })
     })
 
-    
-    
-    // server.addHook('onRequest', (request, reply, next) => {
-    //     console.log(request.cookies)
-    //     console.log(request.session)
-    //     //request.session.set()
-    //     //next()
-    // })
+    server.addHook('onRequest', (request, reply, next) => {
+        if (request.session.userRole === undefined) {
+            request.session.userRole = Role.GUEST
+        }
+        next()
+    })
     //await server.after()
     server.log.info('Session Plugin Installed.') 
 })

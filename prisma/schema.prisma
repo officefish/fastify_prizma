@@ -24,8 +24,17 @@ model User {
   secret    String?
   salt      String
   verified  Boolean
+  role      Role     @default(GUEST)
   products  Product[]
   sessions  Session[]
+}
+
+enum Role {
+  GUEST
+  MEMBER
+  PUBLISHER
+  DEVELOPER
+  ADMIN
 }
 
 model Product {

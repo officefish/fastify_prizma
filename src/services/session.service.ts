@@ -6,6 +6,8 @@ import { FastifyRequest } from "fastify/types/request"
 
 import { CreateCookie } from "./cookie.service"
 
+import { Role } from "@prisma/client"
+
 async function createSession(prisma:PrismaClient, data: Prisma.SessionUncheckedCreateInput) {
     const session = await prisma.session.create({data})
     return session
@@ -16,24 +18,30 @@ async function getUniqueSession(prisma:PrismaClient, data:Prisma.SessionWhereUni
     return session
 }
 
-async function regenerateSession(request:FastifyRequest, reply:FastifyReply) {
+type RegenerateSessionInput = {
+    request:FastifyRequest
+    reply:FastifyReply
+    userId?: string 
+    userRole?: Role 
+}
 
-    const maxAge = request.server.env.SESSION_MAX_AGE
+async function regenerateSession(input:RegenerateSessionInput) {
+
+    const maxAge = input.request.server.env.SESSION_MAX_AGE
     const sessionExpires = new Date(Date.now() + maxAge)
-    const options = {...request.server.cookieOptions, expires:sessionExpires}    
+    const options = {...input.request.server.cookieOptions, expires:sessionExpires}    
 
-    let userId = request.session.user_id
-
-    await request.session.regenerate()
+    await input.request.session.regenerate()
     CreateCookie( 
-            {reply, 
-            name:'sessionId', value: request.session.id || '', 
+            {reply:input.reply, 
+            name:'sessionId', value: input.request.session.id || '', 
             options})
 
-    const sessionToken = request.session.id || ''
-    request.session.user_id = userId
+    const sessionToken = input.request.session.id || ''
+    input.request.session.userId = input.userId
+    input.request.session.userRole = input.userRole || Role.GUEST 
 
-    return {sessionToken, userId, options}
+    return {sessionToken, options}
 }
 
 async function updateSession(prisma:PrismaClient, sessionToken: string, newSessionToken: string) {

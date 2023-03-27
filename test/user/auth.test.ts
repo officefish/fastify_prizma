@@ -158,6 +158,4 @@ describe('Auth API', () => {
         expect(newRefreshToken.length > 0).toBeFalsy()
     })
 
-
-
 })

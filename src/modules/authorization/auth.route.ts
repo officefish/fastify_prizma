@@ -20,7 +20,6 @@ import { GetProtectedDataHandler,
   Login2FAHandler,
   LoginHandler,
   LogoutHandler,
-  AuthenticateHandler
 } from "./auth.controller"
 
 import { $ref } from "./auth.schema"
@@ -568,32 +567,7 @@ export { routes as AuthRoutes}
 // }
 
 // export async function resetPassword(request, reply) {
-//   const {email, expires, password, token} = request.body;
-
-//   // Determine if the token matches the
-//   // specified email and expires timestamp.
-//   const matches = token === createJwt(email, expires);
-
-//   // If the token does not match or is expired ...
-//   if (!matches || Date.now() > expires) {
-//     reply.code(400).send('password reset link expired');
-//     return;
-//   }
-
-//   try {
-//     // Update the record in the "user" collection
-//     // with a new hashed password.
-//     const hashedPassword = await hashPassword(password);
-//     await getCollection('user').updateOne(
-//       {email},
-//       {$set: {password: hashedPassword}}
-//     );
-
-//     reply.send('password reset');
-//   } catch (e) {
-//     console.error('resetPassword error:', e);
-//     reply.code(500).send('error resetting password: ' + e.message);
-//   }
+// 
 // }
 
 // export async function sendEmail({from = FROM_EMAIL, to, subject, html}) {

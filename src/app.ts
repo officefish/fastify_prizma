@@ -19,7 +19,8 @@ import { DeleteAllUsers } from './modules/user/user.service'
 export type AppOptions = Partial<FastifyServerOptions>
 
 async function buildApp(options: AppOptions = {}) {
-    const fastify = Fastify(options)
+    
+  const fastify = Fastify(options)
 
     for (const schema of [
       ...AuthSchemas,

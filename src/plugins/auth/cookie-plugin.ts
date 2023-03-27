@@ -37,6 +37,7 @@ const cookiePlugin = fp(async (server) => {
 
     server.decorate('cookieOptions', cookieOptions)
 
+
     const cookieContext = {}
     server.decorateReply('cookies', { getter: () => cookieContext })
 

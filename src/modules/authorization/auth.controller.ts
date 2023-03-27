@@ -54,7 +54,9 @@ async function authenticate(request:FastifyRequest, reply:FastifyReply) {
         const refreshToken = request.cookies['refresh-token'] || ""
         await service.Verify(jwt, refreshToken)
 
-        const {sessionToken, userId} =  await service.RegenerateSession(request, reply)
+        const userId = request.session.userId || ""
+        const userRole = request.session.userRole
+        const {sessionToken} =  await service.RegenerateSession({request, reply, userId, userRole})
         await createTokenCookies({ userId, sessionToken, request, reply})
 
         // maybe need to send verify email one more time?
@@ -123,7 +125,9 @@ async function login(request:FastifyRequest<{
           // 2FA is not enabled for this account,
           // so create a new session for this user.
           //await updateSession(request, reply, user)
-          const {sessionToken, userId} = await service.RegenerateSession(request, reply)
+          const userId = user.id
+          const userRole = user.role
+          const {sessionToken} = await service.RegenerateSession({request, reply, userId, userRole})
           await createTokenCookies({ userId, sessionToken, request, reply})
           
           if (!user.verified) {
@@ -148,7 +152,7 @@ async function login(request:FastifyRequest<{
 async function logout(request:FastifyRequest, reply:FastifyReply) {
   try {
         
-        const {options} = await service.RegenerateSession(request, reply)
+        const {options} = await service.RegenerateSession({request, reply})
       
         // Clear the access and refresh token cookies for this session.
         service.ClearCookie({reply, name:'access-token', options})
@@ -156,8 +160,7 @@ async function logout(request:FastifyRequest, reply:FastifyReply) {
         reply.code(200).send({status:'logged out'})
     
       } catch (e) {
-        console.error('logout error:', e)
-        reply.code(400).send(e)
+        reply.code(400).send({error:e})
     }
 }
 
@@ -260,5 +263,6 @@ export {
 }
 
 export const authController = {
-  login
+  login,
+  logout
 }

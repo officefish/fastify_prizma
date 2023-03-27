@@ -17,7 +17,8 @@ const swaggerPlugin = fp(async (server) => {
                 { name: 'auth', description: 'Authorize User related end-points.' },
                 { name: 'user', description: 'User related end-points.' },
                 { name: 'password', description: 'User password related end-points.' },
-                { name: 'session', description: 'User session related end-points.' }
+                { name: 'session', description: 'User session related end-points.' },
+                { name: 'role', description: 'User role related end-points.' }
               ],
         }
     }))

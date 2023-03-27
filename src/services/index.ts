@@ -15,6 +15,7 @@ import { NowPlusDays } from "./cookie.service"
 import { IsMobile} from "./help.service"
 import { CreateJwt } from "./crypto.service"
 import { SendMail } from "./mail.service"
+import { GetResetPasswordLink } from './link.service'
 
 export default {
     CreateSession,
@@ -32,5 +33,6 @@ export default {
     NowPlusMinutes,
     NowPlusDays,
     IsMobile,
-    SendMail
+    SendMail,
+    GetResetPasswordLink
 }

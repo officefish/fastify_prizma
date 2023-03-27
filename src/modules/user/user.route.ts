@@ -5,16 +5,39 @@ import {
     CreateUserHandler,
     GetCurrentUserHandler,
     GetUniqueUserHandler,
+    GetManyUsersHandler,
     DeleteCurrentUserHandler,
     DeleteUserHandler,
     GetNewPasswordHandler,
     ChangePasswordHandler,
     ForgotPasswordHandler,
     ResetPasswordHandler,
-    DeleteUserSessionsHandler
+    DeleteUserSessionsHandler,
+    IsAdminHandler,
+    IsPablisherHandler,
+    IsDeveloperHandler,
+    IsMemberHandler,
+    UpdateRoleHandler
 } from './user.controller'
+import zodToJsonSchema from "zod-to-json-schema"
+
+declare module 'fastify' {
+   
+    interface FastifyInstance {
+        admin: any,
+        publisher: any,
+        developer: any,
+        member: any
+    }
+}
 
 async function routes(server:FastifyInstance) {
+
+    /* User Role decorators */
+    server.decorate('admin', IsAdminHandler)
+    server.decorate('publisher', IsPablisherHandler)
+    server.decorate('developer', IsDeveloperHandler)
+    server.decorate('member', IsMemberHandler)
     
     /* User api. Seems it should be in user module. */
     server.post('/', {
@@ -27,8 +50,17 @@ async function routes(server:FastifyInstance) {
             tags: ['user'],
         }
       }, CreateUserHandler)
-      
+
     server.get('/', {
+        preHandler: [server.authenticate],
+        schema: {
+            params: $ref('manyUsersSchema'),
+            description: 'Get many users minimum data',
+            tags: ['user'],
+        }
+    }, GetManyUsersHandler)
+      
+    server.get('/current', {
         preHandler: [server.authenticate],
         schema: {
             response: {
@@ -59,17 +91,19 @@ async function routes(server:FastifyInstance) {
         }
     }, DeleteCurrentUserHandler)
     
-    server.delete('/:email', {
-        preHandler: [server.authenticate],
+    server.delete('/:email/:id', {
+        preHandler: [server.admin],
         schema: {
-            description: 'Delete user with email ???',
+            params: $ref('uniqueUserSchema'),
+            description: 'Delete user with email. Admin Role required.',
             tags: ['user'],
         }
     }, DeleteUserHandler)
   
-    /* User api associated with his password. */
+    /* User api related with password. */
     server.get('/reset/:email/:expires/:token', {
         schema: {
+            params: $ref('newPasswordSchema'),
             description: 'Get user password with token???',
             tags: ['password'],
         }
@@ -94,6 +128,7 @@ async function routes(server:FastifyInstance) {
     server.post('/reset', {
         preHandler: [server.authenticate],
         schema: {
+            body: $ref('resetPasswordSchema'),
             description: 'Reset User password.',
             tags: ['password'],
         }
@@ -107,6 +142,15 @@ async function routes(server:FastifyInstance) {
             tags: ['session'],
         }
     }, DeleteUserSessionsHandler)
+
+    server.put('/role', {
+        preHandler: [server.admin],
+        schema: {
+            body: $ref('updateRoleSchema'),
+            description: 'Update User role.',
+            tags: ['user','role'],
+        }
+    }, UpdateRoleHandler)
 
     //await server.after()
     server.log.info('User routes added.')
